@@ -5,12 +5,8 @@ using Safahat.Models.Entities;
 
 namespace Safahat.Infrastructure.Repositories.Implementations;
 
-public class UserRepository : Repository<User>, IUserRepository
+public class UserRepository(SafahatDbContext context) : Repository<User>(context), IUserRepository
 {
-    public UserRepository(SafahatDbContext context) : base(context)
-    {
-    }
-        
     public async Task<User> GetByUsernameAsync(string username)
     {
         return await _dbSet.FirstOrDefaultAsync(u => u.Username == username);

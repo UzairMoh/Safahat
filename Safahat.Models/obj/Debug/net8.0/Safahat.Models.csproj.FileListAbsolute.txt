@@ -9,3 +9,4 @@ C:\Users\Uzair\RiderProjects\Safahat\Safahat.Models\obj\Debug\net8.0\Safahat.Mod
 C:\Users\Uzair\RiderProjects\Safahat\Safahat.Models\obj\Debug\net8.0\refint\Safahat.Models.dll
 C:\Users\Uzair\RiderProjects\Safahat\Safahat.Models\obj\Debug\net8.0\Safahat.Models.pdb
 C:\Users\Uzair\RiderProjects\Safahat\Safahat.Models\obj\Debug\net8.0\ref\Safahat.Models.dll
+C:\Users\Uzair\RiderProjects\Safahat\Safahat.Models\obj\Debug\net8.0\Safahat.Models.sourcelink.json

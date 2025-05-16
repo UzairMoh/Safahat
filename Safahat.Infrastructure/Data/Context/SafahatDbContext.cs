@@ -7,6 +7,12 @@ namespace Safahat.Infrastructure.Data.Context;
 public class SafahatDbContext(DbContextOptions<SafahatDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<Post> Posts { get; set; }
+    public DbSet<Comment> Comments { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Tag> Tags { get; set; }
+    public DbSet<PostCategory> PostCategories { get; set; }
+    public DbSet<PostTag> PostTags { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

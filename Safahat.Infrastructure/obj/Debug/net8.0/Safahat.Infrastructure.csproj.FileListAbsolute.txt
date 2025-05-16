@@ -15,3 +15,4 @@ C:\Users\Uzair\RiderProjects\Safahat\Safahat.Infrastructure\obj\Debug\net8.0\ref
 C:\Users\Uzair\RiderProjects\Safahat\Safahat.Infrastructure\obj\Debug\net8.0\Safahat.Infrastructure.pdb
 C:\Users\Uzair\RiderProjects\Safahat\Safahat.Infrastructure\obj\Debug\net8.0\Safahat.Infrastructure.genruntimeconfig.cache
 C:\Users\Uzair\RiderProjects\Safahat\Safahat.Infrastructure\obj\Debug\net8.0\ref\Safahat.Infrastructure.dll
+C:\Users\Uzair\RiderProjects\Safahat\Safahat.Infrastructure\obj\Debug\net8.0\Safahat.Infrastructure.sourcelink.json

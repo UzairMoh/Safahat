@@ -16,11 +16,15 @@ public static class DependencyInjection
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly(typeof(SafahatDbContext).Assembly.FullName)));
-        
+            
         // Register repositories
         services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         services.AddScoped<IUserRepository, UserRepository>();
-        
+        services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<ITagRepository, TagRepository>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
+            
         return services;
     }
 }

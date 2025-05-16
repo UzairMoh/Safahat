@@ -15,7 +15,6 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
     public DateTime? LastLoginAt { get; set; }
         
-    // We'll add these navigation properties back later
-    // public ICollection<Post> Posts { get; set; }
-    // public ICollection<Comment> Comments { get; set; }
+    public ICollection<Post> Posts { get; set; }
+    public ICollection<Comment> Comments { get; set; }
 }
