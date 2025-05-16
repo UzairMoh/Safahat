@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Safahat.API.props" />
+</Project>
