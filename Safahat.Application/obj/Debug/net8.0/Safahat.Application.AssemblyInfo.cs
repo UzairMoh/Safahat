@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Safahat.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d750fd07f4a0825fb68ffd9c2ecda5c5ad6567fc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32b39f6bbf750875a1ea86e9d40cde85888f39b7")]
 [assembly: System.Reflection.AssemblyProductAttribute("Safahat.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Safahat.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

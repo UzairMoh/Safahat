@@ -10,8 +10,8 @@ public class User : BaseEntity
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public UserRole Role { get; set; } = UserRole.Reader;
-    public string Bio { get; set; }
-    public string ProfilePictureUrl { get; set; }
+    public string? Bio { get; set; }
+    public string? ProfilePictureUrl { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime? LastLoginAt { get; set; }
         

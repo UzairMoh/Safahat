@@ -9,6 +9,7 @@ using Safahat.Application.DTOs.Responses.Categories;
 using Safahat.Application.DTOs.Responses.Comments;
 using Safahat.Application.DTOs.Responses.Posts;
 using Safahat.Application.DTOs.Responses.Tags;
+using Safahat.Application.DTOs.Responses.Users;
 using Safahat.Models.Entities;
 using Safahat.Models.Enums;
 
@@ -35,6 +36,14 @@ public class MappingProfile : Profile
                 .ForMember(dest => dest.IsActive, opt => opt.Ignore())
                 .ForMember(dest => dest.LastLoginAt, opt => opt.Ignore());
 
+            CreateMap<User, UserListItemResponse>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
+
+            CreateMap<User, UserDetailResponse>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"))
+                .ForMember(dest => dest.PostCount, opt => opt.Ignore())
+                .ForMember(dest => dest.CommentCount, opt => opt.Ignore());
+            
             // Post mappings
             CreateMap<Post, PostResponse>()
                 .ForMember(dest => dest.Author, opt => opt.MapFrom(src => src.Author))

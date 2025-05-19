@@ -1,24 +1,45 @@
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Safahat.Application;
 using Safahat.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Add Infrastructure Services
-builder.Services.AddInfrastructure(builder.Configuration);
-
-builder.Services.AddAuthentication(options =>
+builder.Services.AddSwaggerGen(c =>
+{
+    // Add JWT authentication to Swagger
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+// Configure JWT Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -29,40 +50,56 @@ builder.Services.AddAuthentication(options =>
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+            ClockSkew = TimeSpan.Zero // Reduce the default 5 min tolerance
         };
     });
 
-builder.Services.AddCors(options =>
+// Add authorization policies
+builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy.WithOrigins(
-                "http://localhost:3000",
-                "http://localhost:5173"
-            )
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials();
-    });
+    // Policy for admins only
+    options.AddPolicy("AdminOnly", policy => 
+        policy.RequireRole("Admin"));
+    
+    // Policy for authenticated users (any role)
+    options.AddPolicy("AuthenticatedUser", policy => 
+        policy.RequireAuthenticatedUser());
+    
+    // Policy for resource owners or admins
+    options.AddPolicy("ResourceOwnerOrAdmin", policy =>
+        policy.RequireAssertion(context =>
+        {
+            // Admin can access any resource
+            if (context.User.IsInRole("Admin"))
+                return true;
+                
+            // For non-admins, check if they're accessing their own resource
+            // This will be checked in individual actions using IAuthorizationService
+            return false;
+        }));
 });
 
+// Other service registrations...
+builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
+builder.Services.AddCors(/* your CORS config */);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Configure app
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Comment out HTTPS redirection for HTTP development
-// app.UseHttpsRedirection();
-
 app.UseCors("AllowReactApp");
-app.UseAuthorization();
-app.MapControllers();
 
+// IMPORTANT: Authentication must come before Authorization
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
 app.Run();
