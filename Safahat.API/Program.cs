@@ -7,12 +7,10 @@ using Safahat.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // Add JWT authentication to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -38,7 +36,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configure JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -56,39 +53,40 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add authorization policies
 builder.Services.AddAuthorization(options =>
 {
-    // Policy for admins only
     options.AddPolicy("AdminOnly", policy => 
         policy.RequireRole("Admin"));
     
-    // Policy for authenticated users (any role)
     options.AddPolicy("AuthenticatedUser", policy => 
         policy.RequireAuthenticatedUser());
     
-    // Policy for resource owners or admins
     options.AddPolicy("ResourceOwnerOrAdmin", policy =>
         policy.RequireAssertion(context =>
         {
-            // Admin can access any resource
             if (context.User.IsInRole("Admin"))
                 return true;
-                
-            // For non-admins, check if they're accessing their own resource
-            // This will be checked in individual actions using IAuthorizationService
             return false;
         }));
 });
 
-// Other service registrations...
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
-builder.Services.AddCors(/* your CORS config */);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", builder =>
+    {
+        builder
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
-// Configure app
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -97,7 +95,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors("AllowReactApp");
 
-// IMPORTANT: Authentication must come before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
