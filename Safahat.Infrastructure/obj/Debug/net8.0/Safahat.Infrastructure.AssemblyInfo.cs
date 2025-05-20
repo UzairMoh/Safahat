@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Safahat.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+32b39f6bbf750875a1ea86e9d40cde85888f39b7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+83c6a1dce15fd5972f667e81bdf31698c690912a")]
 [assembly: System.Reflection.AssemblyProductAttribute("Safahat.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Safahat.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
