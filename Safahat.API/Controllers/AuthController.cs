@@ -9,15 +9,8 @@ namespace Safahat.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    private readonly IAuthService _authService;
-
-    public AuthController(IAuthService authService)
-    {
-        _authService = authService;
-    }
-
     /// <summary>
     /// Login a user and return a JWT token
     /// </summary>
@@ -26,7 +19,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var response = await _authService.LoginAsync(request);
+            var response = await authService.LoginAsync(request);
             return Ok(response);
         }
         catch (ApplicationException ex)
@@ -43,7 +36,7 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var response = await _authService.RegisterAsync(request);
+            var response = await authService.RegisterAsync(request);
             return Ok(response);
         }
         catch (ApplicationException ex)
@@ -63,7 +56,7 @@ public class AuthController : ControllerBase
         {
             // Get the authenticated user's ID from claims
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await _authService.ChangePasswordAsync(userId, request);
+            var result = await authService.ChangePasswordAsync(userId, request);
             return Ok(new { success = result });
         }
         catch (ApplicationException ex)
@@ -83,7 +76,7 @@ public class AuthController : ControllerBase
         {
             // Get the authenticated user's ID from claims
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var profile = await _authService.GetUserProfileAsync(userId);
+            var profile = await authService.GetUserProfileAsync(userId);
             return Ok(profile);
         }
         catch (ApplicationException ex)
@@ -103,7 +96,7 @@ public class AuthController : ControllerBase
         {
             // Get the authenticated user's ID from claims
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var updatedProfile = await _authService.UpdateUserProfileAsync(userId, request);
+            var updatedProfile = await authService.UpdateUserProfileAsync(userId, request);
             return Ok(updatedProfile);
         }
         catch (ApplicationException ex)

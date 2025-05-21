@@ -14,25 +14,16 @@ using Safahat.Models.Enums;
 
 namespace Safahat.Application.Services;
 
-public class AuthService : IAuthService
+public class AuthService(
+    IUserRepository userRepository,
+    IMapper mapper,
+    IConfiguration configuration)
+    : IAuthService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IMapper _mapper;
-    private readonly IConfiguration _configuration;
-
-    public AuthService(
-        IUserRepository userRepository,
-        IMapper mapper,
-        IConfiguration configuration)
-    {
-        _userRepository = userRepository;
-        _mapper = mapper;
-        _configuration = configuration;
-    }
-
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
-        var user = await _userRepository.GetByEmailAsync(request.Email);
+        var user = await userRepository.GetByEmailAsync(request.Email);
+        
         if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
         {
             throw new ApplicationException("Invalid email or password");
@@ -45,7 +36,7 @@ public class AuthService : IAuthService
 
         // Update last login
         user.LastLoginAt = DateTime.UtcNow;
-        await _userRepository.UpdateAsync(user);
+        await userRepository.UpdateAsync(user);
 
         // Generate JWT token
         var token = GenerateJwtToken(user);
@@ -54,7 +45,7 @@ public class AuthService : IAuthService
         return new AuthResponse
         {
             Token = token,
-            User = _mapper.Map<UserResponse>(user),
+            User = mapper.Map<UserResponse>(user),
             Expiration = expiration
         };
     }
@@ -62,21 +53,21 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         // Check if email is already taken
-        var existingEmail = await _userRepository.GetByEmailAsync(request.Email);
+        var existingEmail = await userRepository.GetByEmailAsync(request.Email);
         if (existingEmail != null)
         {
             throw new ApplicationException("Email is already registered");
         }
 
         // Check if username is already taken
-        var existingUsername = await _userRepository.GetByUsernameAsync(request.Username);
+        var existingUsername = await userRepository.GetByUsernameAsync(request.Username);
         if (existingUsername != null)
         {
             throw new ApplicationException("Username is already taken");
         }
 
         // Map request to user entity
-        var user = _mapper.Map<User>(request);
+        var user = mapper.Map<User>(request);
         
         // Hash password
         user.PasswordHash = HashPassword(request.Password);
@@ -85,7 +76,7 @@ public class AuthService : IAuthService
         user.Role = UserRole.Reader;
         
         // Save user to database
-        var createdUser = await _userRepository.AddAsync(user);
+        var createdUser = await userRepository.AddAsync(user);
 
         // Generate JWT token
         var token = GenerateJwtToken(createdUser);
@@ -94,14 +85,14 @@ public class AuthService : IAuthService
         return new AuthResponse
         {
             Token = token,
-            User = _mapper.Map<UserResponse>(createdUser),
+            User = mapper.Map<UserResponse>(createdUser),
             Expiration = expiration
         };
     }
 
     public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
@@ -118,37 +109,37 @@ public class AuthService : IAuthService
         user.UpdatedAt = DateTime.UtcNow;
 
         // Update user in database
-        await _userRepository.UpdateAsync(user);
+        await userRepository.UpdateAsync(user);
         return true;
     }
 
     public async Task<UserResponse> GetUserProfileAsync(int userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
         }
 
-        return _mapper.Map<UserResponse>(user);
+        return mapper.Map<UserResponse>(user);
     }
 
     public async Task<UserResponse> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
         }
 
         // Update user properties
-        _mapper.Map(request, user);
+        mapper.Map(request, user);
         user.UpdatedAt = DateTime.UtcNow;
 
         // Update user in database
-        await _userRepository.UpdateAsync(user);
+        await userRepository.UpdateAsync(user);
 
-        return _mapper.Map<UserResponse>(user);
+        return mapper.Map<UserResponse>(user);
     }
 
     #region Helper Methods
@@ -212,7 +203,7 @@ public class AuthService : IAuthService
 
     private string GenerateJwtToken(User user)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>
@@ -222,8 +213,8 @@ public class AuthService : IAuthService
         };
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
+            issuer: configuration["Jwt:Issuer"],
+            audience: configuration["Jwt:Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddDays(7),
             signingCredentials: credentials
