@@ -8,6 +8,17 @@ namespace Safahat.Infrastructure.Repositories.Implementations;
 
 public class PostRepository(SafahatDbContext context) : Repository<Post>(context), IPostRepository
 {
+        public override async Task<Post> GetByIdAsync(int id)
+        {
+            return (await _dbSet
+                .Include(p => p.Author)
+                .Include(p => p.PostCategories)
+                .ThenInclude(pc => pc.Category)
+                .Include(p => p.PostTags)
+                .ThenInclude(pt => pt.Tag)
+                .FirstOrDefaultAsync(p => p.Id == id))!;
+        }
+           
         public async Task<IEnumerable<Post>> GetPublishedPostsAsync()
         {
             return await _dbSet
@@ -19,6 +30,11 @@ public class PostRepository(SafahatDbContext context) : Repository<Post>(context
         public async Task<IEnumerable<Post>> GetPostsByAuthorAsync(int authorId)
         {
             return await _dbSet
+                .Include(p => p.Author)
+                .Include(p => p.PostCategories)
+                .ThenInclude(pc => pc.Category)
+                .Include(p => p.PostTags)
+                .ThenInclude(pt => pt.Tag)
                 .Where(p => p.AuthorId == authorId)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();

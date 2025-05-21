@@ -52,4 +52,6 @@ public abstract class BaseController : ControllerBase
     protected ActionResult NotFoundWithMessage(string message) => NotFound(new { error = message });
     protected ActionResult ForbidWithMessage(string message = "Access denied") => StatusCode(403, new { error = message });
     protected ActionResult BadRequestWithMessage(string message) => BadRequest(new { error = message });
+    protected ActionResult CreatedWithMessage<T>(string message, T data, string routePath = null) => 
+        Created(routePath ?? Request.Path.Value, new { success = true, message, data });
 }

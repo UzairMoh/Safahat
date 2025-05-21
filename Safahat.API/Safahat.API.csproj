@@ -18,10 +18,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Middleware\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\Safahat.Application\Safahat.Application.csproj" />
       <ProjectReference Include="..\Safahat.Infrastructure\Safahat.Infrastructure.csproj" />
       <ProjectReference Include="..\Safahat.Models\Safahat.Models.csproj" />
