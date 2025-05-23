@@ -8,45 +8,36 @@ using Safahat.Models.Entities;
 
 namespace Safahat.Application.Services;
 
-public class CategoryService : ICategoryService
+public class CategoryService(
+    ICategoryRepository categoryRepository,
+    IMapper mapper) : ICategoryService
 {
-    private readonly ICategoryRepository _categoryRepository;
-    private readonly IMapper _mapper;
-
-    public CategoryService(
-        ICategoryRepository categoryRepository,
-        IMapper mapper)
+    public async Task<CategoryResponse> GetByIdAsync(Guid id)
     {
-        _categoryRepository = categoryRepository;
-        _mapper = mapper;
-    }
-
-    public async Task<CategoryResponse> GetByIdAsync(int id)
-    {
-        var category = await _categoryRepository.GetByIdAsync(id);
+        var category = await categoryRepository.GetByIdAsync(id);
         if (category == null)
         {
             throw new ApplicationException("Category not found");
         }
 
-        return _mapper.Map<CategoryResponse>(category);
+        return mapper.Map<CategoryResponse>(category);
     }
 
     public async Task<CategoryResponse> GetBySlugAsync(string slug)
     {
-        var category = await _categoryRepository.GetBySlugAsync(slug);
+        var category = await categoryRepository.GetBySlugAsync(slug);
         if (category == null)
         {
             throw new ApplicationException("Category not found");
         }
 
-        return _mapper.Map<CategoryResponse>(category);
+        return mapper.Map<CategoryResponse>(category);
     }
 
     public async Task<IEnumerable<CategoryResponse>> GetAllAsync()
     {
-        var categories = await _categoryRepository.GetAllAsync();
-        return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
+        var categories = await categoryRepository.GetAllAsync();
+        return mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
 
     public async Task<CategoryResponse> CreateAsync(CreateCategoryRequest request)
@@ -62,21 +53,21 @@ public class CategoryService : ICategoryService
         }
 
         // Check if slug is unique
-        var isSlugUnique = await _categoryRepository.IsSlugUniqueAsync(request.Slug);
+        var isSlugUnique = await categoryRepository.IsSlugUniqueAsync(request.Slug);
         if (!isSlugUnique)
         {
             throw new ApplicationException("A category with this slug already exists");
         }
 
-        var category = _mapper.Map<Category>(request);
-        var createdCategory = await _categoryRepository.AddAsync(category);
+        var category = mapper.Map<Category>(request);
+        var createdCategory = await categoryRepository.AddAsync(category);
         
-        return _mapper.Map<CategoryResponse>(createdCategory);
+        return mapper.Map<CategoryResponse>(createdCategory);
     }
 
-    public async Task<CategoryResponse> UpdateAsync(int categoryId, UpdateCategoryRequest request)
+    public async Task<CategoryResponse> UpdateAsync(Guid categoryId, UpdateCategoryRequest request)
     {
-        var category = await _categoryRepository.GetByIdAsync(categoryId);
+        var category = await categoryRepository.GetByIdAsync(categoryId);
         if (category == null)
         {
             throw new ApplicationException("Category not found");
@@ -95,7 +86,7 @@ public class CategoryService : ICategoryService
         // Check if slug is unique (if changed)
         if (!string.IsNullOrEmpty(request.Slug) && request.Slug != category.Slug)
         {
-            var isSlugUnique = await _categoryRepository.IsSlugUniqueAsync(request.Slug);
+            var isSlugUnique = await categoryRepository.IsSlugUniqueAsync(request.Slug);
             if (!isSlugUnique)
             {
                 throw new ApplicationException("A category with this slug already exists");
@@ -103,16 +94,16 @@ public class CategoryService : ICategoryService
         }
 
         // Update category properties
-        _mapper.Map(request, category);
+        mapper.Map(request, category);
         category.UpdatedAt = DateTime.UtcNow;
 
-        await _categoryRepository.UpdateAsync(category);
-        return _mapper.Map<CategoryResponse>(category);
+        await categoryRepository.UpdateAsync(category);
+        return mapper.Map<CategoryResponse>(category);
     }
 
-    public async Task<bool> DeleteAsync(int categoryId)
+    public async Task<bool> DeleteAsync(Guid categoryId)
     {
-        var category = await _categoryRepository.GetByIdAsync(categoryId);
+        var category = await categoryRepository.GetByIdAsync(categoryId);
         if (category == null)
         {
             throw new ApplicationException("Category not found");
@@ -121,17 +112,17 @@ public class CategoryService : ICategoryService
         // Check if category is used in any posts before deletion
         // This might require a method in the post repository to check this
 
-        await _categoryRepository.DeleteAsync(categoryId);
+        await categoryRepository.DeleteAsync(categoryId);
         return true;
     }
 
     public async Task<IEnumerable<CategoryResponse>> GetCategoriesWithPostCountAsync()
     {
         // Get all categories
-        var categories = await _categoryRepository.GetAllAsync();
+        var categories = await categoryRepository.GetAllAsync();
         
         // Map to response DTOs (the PostCount property should be populated by mapping profile)
-        return _mapper.Map<IEnumerable<CategoryResponse>>(categories);
+        return mapper.Map<IEnumerable<CategoryResponse>>(categories);
     }
 
     #region Helper Methods

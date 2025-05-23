@@ -32,8 +32,8 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Get post by ID
     /// </summary>
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<PostResponse>> GetPostById(int id)
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<PostResponse>> GetPostById(Guid id)
     {
         try
         {
@@ -66,17 +66,12 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Get posts by author - With authorization check
     /// </summary>
-    [HttpGet("author/{authorId:int}")]
-    public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByAuthor(int authorId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    [HttpGet("author/{authorId:guid}")]
+    public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByAuthor(Guid authorId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        // If user is authenticated and requesting their own posts, or if Admin, allow access to all posts
-        // Otherwise only return published posts
-        var isAuthorized = User.Identity.IsAuthenticated && 
-                          (authorId == UserId || User.IsInRole("Admin"));
-                          
+        var isAuthorized = User.Identity.IsAuthenticated && (authorId == UserId || IsAdmin);
         var posts = await postService.GetPostsByAuthorAsync(authorId, pageNumber, pageSize);
         
-        // If not authorized, filter to only published posts
         if (!isAuthorized)
         {
             posts = posts.Where(p => p.Status == Models.Enums.PostStatus.Published);
@@ -99,17 +94,15 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Update a post - Author or Admin only
     /// </summary>
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
-    public async Task<ActionResult<PostResponse>> UpdatePost(int id, [FromBody] UpdatePostRequest request)
+    public async Task<ActionResult<PostResponse>> UpdatePost(Guid id, [FromBody] UpdatePostRequest request)
     {
         try
         {
-            // Get post to check authorization
             var existingPost = await postService.GetByIdAsync(id);
             
-            // Check if user can edit this post
-            if (existingPost.Author.Id != UserId && !User.IsInRole("Admin"))
+            if (existingPost.Author.Id != UserId && !IsAdmin)
             {
                 return ForbidWithMessage("You don't have permission to edit this post");
             }
@@ -126,17 +119,15 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Delete a post - Author or Admin only
     /// </summary>
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
-    public async Task<ActionResult> DeletePost(int id)
+    public async Task<ActionResult> DeletePost(Guid id)
     {
         try
         {
-            // Get post to check authorization
             var existingPost = await postService.GetByIdAsync(id);
             
-            // Check if user can delete this post
-            if (existingPost.Author.Id != UserId && !User.IsInRole("Admin"))
+            if (existingPost.Author.Id != UserId && !IsAdmin)
             {
                 return ForbidWithMessage("You don't have permission to delete this post");
             }
@@ -168,8 +159,8 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Get posts by category
     /// </summary>
-    [HttpGet("category/{categoryId:int}")]
-    public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByCategory(int categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    [HttpGet("category/{categoryId:guid}")]
+    public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByCategory(Guid categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await postService.GetPostsByCategoryAsync(categoryId, pageNumber, pageSize);
         return Success(posts);
@@ -178,8 +169,8 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Get posts by tag
     /// </summary>
-    [HttpGet("tag/{tagId:int}")]
-    public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByTag(int tagId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    [HttpGet("tag/{tagId:guid}")]
+    public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByTag(Guid tagId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await postService.GetPostsByTagAsync(tagId, pageNumber, pageSize);
         return Success(posts);
@@ -198,17 +189,15 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Publish a post - Author or Admin only
     /// </summary>
-    [HttpPut("{id:int}/publish")]
+    [HttpPut("{id:guid}/publish")]
     [Authorize(Policy = "AuthenticatedUser")]
-    public async Task<ActionResult> PublishPost(int id)
+    public async Task<ActionResult> PublishPost(Guid id)
     {
         try
         {
-            // Get post to check authorization
             var existingPost = await postService.GetByIdAsync(id);
             
-            // Check if user can publish this post
-            if (existingPost.Author.Id != UserId && !User.IsInRole("Admin"))
+            if (existingPost.Author.Id != UserId && !IsAdmin)
             {
                 return ForbidWithMessage("You don't have permission to publish this post");
             }
@@ -225,17 +214,15 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Unpublish a post - Author or Admin only
     /// </summary>
-    [HttpPut("{id:int}/unpublish")]
+    [HttpPut("{id:guid}/unpublish")]
     [Authorize(Policy = "AuthenticatedUser")]
-    public async Task<ActionResult> UnpublishPost(int id)
+    public async Task<ActionResult> UnpublishPost(Guid id)
     {
         try
         {
-            // Get post to check authorization
             var existingPost = await postService.GetByIdAsync(id);
             
-            // Check if user can unpublish this post
-            if (existingPost.Author.Id != UserId && !User.IsInRole("Admin"))
+            if (existingPost.Author.Id != UserId && !IsAdmin)
             {
                 return ForbidWithMessage("You don't have permission to unpublish this post");
             }
@@ -252,9 +239,9 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Feature a post - Admin only
     /// </summary>
-    [HttpPut("{id:int}/feature")]
+    [HttpPut("{id:guid}/feature")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult> FeaturePost(int id)
+    public async Task<ActionResult> FeaturePost(Guid id)
     {
         try
         {
@@ -270,9 +257,9 @@ public class PostsController(IPostService postService) : BaseController
     /// <summary>
     /// Unfeature a post - Admin only
     /// </summary>
-    [HttpPut("{id:int}/unfeature")]
+    [HttpPut("{id:guid}/unfeature")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult> UnfeaturePost(int id)
+    public async Task<ActionResult> UnfeaturePost(Guid id)
     {
         try
         {

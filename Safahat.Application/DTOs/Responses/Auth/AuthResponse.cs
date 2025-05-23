@@ -1,4 +1,6 @@
-﻿namespace Safahat.Application.DTOs.Responses;
+﻿using Safahat.Application.DTOs.Responses.Auth;
+
+namespace Safahat.Application.DTOs.Responses;
 
 public class AuthResponse
 {

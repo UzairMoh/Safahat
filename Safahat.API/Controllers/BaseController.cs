@@ -19,11 +19,11 @@ public abstract class BaseController : ControllerBase
     /// <summary>
     /// Gets the ID of the currently authenticated user
     /// </summary>
-    protected int UserId => 
+    protected Guid UserId => 
         User.Identity?.IsAuthenticated == true && 
-        int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) 
+        Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) 
             ? id 
-            : 0;
+            : Guid.Empty;
 
     /// <summary>
     /// Gets whether the current user is an administrator
@@ -35,7 +35,7 @@ public abstract class BaseController : ControllerBase
     /// <summary>
     /// Checks if the current user is authorized to access a resource
     /// </summary>
-    protected async Task<bool> UserCanAccessResourceAsync(int resourceOwnerId, string policyName = "ResourceOwnerOrAdmin")
+    protected async Task<bool> UserCanAccessResourceAsync(Guid resourceOwnerId, string policyName = "ResourceOwnerOrAdmin")
     {
         // Admin can always access
         if (IsAdmin)

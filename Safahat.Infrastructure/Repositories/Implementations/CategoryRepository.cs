@@ -7,14 +7,14 @@ namespace Safahat.Infrastructure.Repositories.Implementations;
 
 public class CategoryRepository(SafahatDbContext context) : Repository<Category>(context), ICategoryRepository
 {
-    public async Task<Category> GetBySlugAsync(string slug)
+    public async Task<Category?> GetBySlugAsync(string slug)
     {
-        return await _dbSet
+        return await DbSet
             .FirstOrDefaultAsync(c => c.Slug == slug);
     }
 
     public async Task<bool> IsSlugUniqueAsync(string slug)
     {
-        return !await _dbSet.AnyAsync(c => c.Slug == slug);
+        return !await DbSet.AnyAsync(c => c.Slug == slug);
     }
 }

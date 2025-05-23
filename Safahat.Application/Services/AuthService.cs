@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,10 +8,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Safahat.Application.DTOs.Requests;
 using Safahat.Application.DTOs.Responses;
+using Safahat.Application.DTOs.Responses.Auth;
 using Safahat.Application.Interfaces;
 using Safahat.Infrastructure.Repositories.Interfaces;
 using Safahat.Models.Entities;
 using Safahat.Models.Enums;
+
+[assembly: InternalsVisibleTo("Safahat.Tests")]
 
 namespace Safahat.Application.Services;
 
@@ -90,7 +94,7 @@ public class AuthService(
         };
     }
 
-    public async Task<bool> ChangePasswordAsync(int userId, ChangePasswordRequest request)
+    public async Task<bool> ChangePasswordAsync(Guid userId, ChangePasswordRequest request)
     {
         var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -113,7 +117,7 @@ public class AuthService(
         return true;
     }
 
-    public async Task<UserResponse> GetUserProfileAsync(int userId)
+    public async Task<UserResponse> GetUserProfileAsync(Guid userId)
     {
         var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -124,7 +128,7 @@ public class AuthService(
         return mapper.Map<UserResponse>(user);
     }
 
-    public async Task<UserResponse> UpdateUserProfileAsync(int userId, UpdateUserProfileRequest request)
+    public async Task<UserResponse> UpdateUserProfileAsync(Guid userId, UpdateUserProfileRequest request)
     {
         var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
@@ -132,7 +136,7 @@ public class AuthService(
             throw new ApplicationException("User not found");
         }
 
-        // Update user properties
+        // Update user properties using AutoMapper
         mapper.Map(request, user);
         user.UpdatedAt = DateTime.UtcNow;
 
@@ -144,7 +148,7 @@ public class AuthService(
 
     #region Helper Methods
 
-    private string HashPassword(string password)
+    internal string HashPassword(string password)
     {
         // Generate a random salt
         byte[] salt = new byte[16];
@@ -208,8 +212,10 @@ public class AuthService(
 
         var claims = new List<Claim>
         {
-            new Claim("sub", user.Id.ToString()),
-            new Claim("role", user.Role.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email)
         };
 
         var token = new JwtSecurityToken(

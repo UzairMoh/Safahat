@@ -1,15 +1,13 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Safahat.Application.DTOs.Requests;
 using Safahat.Application.DTOs.Responses;
+using Safahat.Application.DTOs.Responses.Auth;
 using Safahat.Application.Interfaces;
 
 namespace Safahat.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService) : BaseController
 {
     /// <summary>
     /// Login a user and return a JWT token
@@ -20,11 +18,11 @@ public class AuthController(IAuthService authService) : ControllerBase
         try
         {
             var response = await authService.LoginAsync(request);
-            return Ok(response);
+            return Success(response);
         }
         catch (ApplicationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequestWithMessage(ex.Message);
         }
     }
 
@@ -37,11 +35,11 @@ public class AuthController(IAuthService authService) : ControllerBase
         try
         {
             var response = await authService.RegisterAsync(request);
-            return Ok(response);
+            return CreatedWithMessage("User registered successfully", response);
         }
         catch (ApplicationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequestWithMessage(ex.Message);
         }
     }
 
@@ -49,19 +47,17 @@ public class AuthController(IAuthService authService) : ControllerBase
     /// Change a user's password
     /// </summary>
     [HttpPost("change-password")]
-    [Authorize]
+    [Authorize(Policy = "AuthenticatedUser")]
     public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         try
         {
-            // Get the authenticated user's ID from claims
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var result = await authService.ChangePasswordAsync(userId, request);
-            return Ok(new { success = result });
+            var result = await authService.ChangePasswordAsync(UserId, request);
+            return Success(new { success = result });
         }
         catch (ApplicationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequestWithMessage(ex.Message);
         }
     }
 
@@ -69,19 +65,17 @@ public class AuthController(IAuthService authService) : ControllerBase
     /// Get the authenticated user's profile
     /// </summary>
     [HttpGet("profile")]
-    [Authorize]
+    [Authorize(Policy = "AuthenticatedUser")]
     public async Task<ActionResult<UserResponse>> GetProfile()
     {
         try
         {
-            // Get the authenticated user's ID from claims
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var profile = await authService.GetUserProfileAsync(userId);
-            return Ok(profile);
+            var profile = await authService.GetUserProfileAsync(UserId);
+            return Success(profile);
         }
         catch (ApplicationException ex)
         {
-            return NotFound(new { error = ex.Message });
+            return NotFoundWithMessage(ex.Message);
         }
     }
 
@@ -89,19 +83,17 @@ public class AuthController(IAuthService authService) : ControllerBase
     /// Update the authenticated user's profile
     /// </summary>
     [HttpPut("profile")]
-    [Authorize]
+    [Authorize(Policy = "AuthenticatedUser")]
     public async Task<ActionResult<UserResponse>> UpdateProfile([FromBody] UpdateUserProfileRequest request)
     {
         try
         {
-            // Get the authenticated user's ID from claims
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var updatedProfile = await authService.UpdateUserProfileAsync(userId, request);
-            return Ok(updatedProfile);
+            var updatedProfile = await authService.UpdateUserProfileAsync(UserId, request);
+            return Success(updatedProfile);
         }
         catch (ApplicationException ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequestWithMessage(ex.Message);
         }
     }
 }

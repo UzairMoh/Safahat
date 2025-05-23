@@ -4,7 +4,7 @@ namespace Safahat.Application.DTOs.Responses.Users;
 
 public class UserListItemResponse
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Username { get; set; }
     public string Email { get; set; }
     public string FullName { get; set; }

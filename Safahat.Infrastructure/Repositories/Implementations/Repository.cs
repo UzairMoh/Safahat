@@ -6,62 +6,63 @@ using Safahat.Models.Entities;
 
 namespace Safahat.Infrastructure.Repositories.Implementations;
 
-public class Repository<T> : IRepository<T> where T : BaseEntity
+public class Repository<T>(SafahatDbContext context) : IRepository<T>
+    where T : BaseEntity
 {
-    protected readonly SafahatDbContext _context;
-    protected readonly DbSet<T> _dbSet;
-        
-    public Repository(SafahatDbContext context)
-    {
-        _context = context;
-        _dbSet = context.Set<T>();
-    }
-        
+    protected readonly DbSet<T> DbSet = context.Set<T>();
+
     public virtual async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await DbSet.ToListAsync();
     }
         
     public virtual async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _dbSet.Where(predicate).ToListAsync();
+        return await DbSet.Where(predicate).ToListAsync();
     }
         
-    public virtual async Task<T> GetByIdAsync(int id)
+    public virtual async Task<T?> GetByIdAsync(Guid id)
     {
-        return await _dbSet.FindAsync(id);
+        return await DbSet.FindAsync(id);
     }
         
     public virtual async Task<T> AddAsync(T entity)
     {
-        await _dbSet.AddAsync(entity);
-        await _context.SaveChangesAsync();
+        // Ensure the entity has a Guid if not already set
+        if (entity.Id == Guid.Empty)
+        {
+            entity.Id = Guid.NewGuid();
+        }
+        
+        await DbSet.AddAsync(entity);
+        await context.SaveChangesAsync();
         return entity;
     }
         
     public virtual async Task UpdateAsync(T entity)
     {
-        _context.Entry(entity).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
+        entity.UpdatedAt = DateTime.UtcNow;
+        context.Entry(entity).State = EntityState.Modified;
+        await context.SaveChangesAsync();
     }
         
-    public virtual async Task DeleteAsync(int id)
+    public virtual async Task DeleteAsync(Guid id)
     {
-        var entity = await _dbSet.FindAsync(id);
+        var entity = await DbSet.FindAsync(id);
         if (entity != null)
         {
-            _dbSet.Remove(entity);
-            await _context.SaveChangesAsync();
+            DbSet.Remove(entity);
+            await context.SaveChangesAsync();
         }
     }
         
-    public virtual async Task<bool> ExistsAsync(int id)
+    public virtual async Task<bool> ExistsAsync(Guid id)
     {
-        return await _dbSet.AnyAsync(e => e.Id == id);
+        return await DbSet.AnyAsync(e => e.Id == id);
     }
         
     public async Task<int> SaveChangesAsync()
     {
-        return await _context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 }

@@ -6,9 +6,9 @@ public class Comment : BaseEntity
     public bool IsApproved { get; set; } = false;
         
     // Foreign keys
-    public int PostId { get; set; }
-    public int UserId { get; set; }
-    public int? ParentCommentId { get; set; }
+    public Guid PostId { get; set; }
+    public Guid UserId { get; set; }
+    public Guid? ParentCommentId { get; set; }
         
     // Navigation properties
     public Post Post { get; set; }

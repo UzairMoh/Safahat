@@ -1,4 +1,6 @@
-﻿namespace Safahat.Application.DTOs.Responses.Posts;
+﻿using Safahat.Application.DTOs.Responses.Auth;
+
+namespace Safahat.Application.DTOs.Responses.Posts;
 
 public class PostSummaryResponse
 {

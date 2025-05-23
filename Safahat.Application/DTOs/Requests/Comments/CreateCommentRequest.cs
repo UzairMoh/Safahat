@@ -2,7 +2,7 @@
 
 public class CreateCommentRequest
 {
-    public int PostId { get; set; }
-    public int? ParentCommentId { get; set; }
+    public Guid PostId { get; set; }
+    public Guid? ParentCommentId { get; set; }
     public string Content { get; set; }
 }

@@ -6,44 +6,31 @@ using Safahat.Infrastructure.Repositories.Interfaces;
 
 namespace Safahat.Application.Services;
 
-public class UserService : IUserService
+public class UserService(
+    IUserRepository userRepository,
+    IPostRepository postRepository,
+    ICommentRepository commentRepository,
+    IMapper mapper)
+    : IUserService
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IPostRepository _postRepository;
-    private readonly ICommentRepository _commentRepository;
-    private readonly IMapper _mapper;
-
-    public UserService(
-        IUserRepository userRepository,
-        IPostRepository postRepository,
-        ICommentRepository commentRepository,
-        IMapper mapper)
-    {
-        _userRepository = userRepository;
-        _postRepository = postRepository;
-        _commentRepository = commentRepository;
-        _mapper = mapper;
-    }
-
     public async Task<IEnumerable<UserListItemResponse>> GetAllUsersAsync()
     {
-        var users = await _userRepository.GetAllAsync();
-        return _mapper.Map<IEnumerable<UserListItemResponse>>(users);
+        var users = await userRepository.GetAllAsync();
+        return mapper.Map<IEnumerable<UserListItemResponse>>(users);
     }
 
-    public async Task<UserDetailResponse> GetUserByIdAsync(int id)
+    public async Task<UserDetailResponse> GetUserByIdAsync(Guid id)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user = await userRepository.GetByIdAsync(id);
         if (user == null)
         {
             throw new ApplicationException("User not found");
         }
 
-        var userDetail = _mapper.Map<UserDetailResponse>(user);
+        var userDetail = mapper.Map<UserDetailResponse>(user);
         
-        // Get post and comment counts
-        var posts = await _postRepository.GetPostsByAuthorAsync(id);
-        var comments = await _commentRepository.GetCommentsByUserAsync(id);
+        var posts = await postRepository.GetPostsByAuthorAsync(id);
+        var comments = await commentRepository.GetCommentsByUserAsync(id);
         
         userDetail.PostCount = posts.Count();
         userDetail.CommentCount = comments.Count();
@@ -53,17 +40,16 @@ public class UserService : IUserService
 
     public async Task<UserDetailResponse> GetUserByUsernameAsync(string username)
     {
-        var user = await _userRepository.GetByUsernameAsync(username);
+        var user = await userRepository.GetByUsernameAsync(username);
         if (user == null)
         {
             throw new ApplicationException("User not found");
         }
 
-        var userDetail = _mapper.Map<UserDetailResponse>(user);
+        var userDetail = mapper.Map<UserDetailResponse>(user);
         
-        // Get post and comment counts
-        var posts = await _postRepository.GetPostsByAuthorAsync(user.Id);
-        var comments = await _commentRepository.GetCommentsByUserAsync(user.Id);
+        var posts = await postRepository.GetPostsByAuthorAsync(user.Id);
+        var comments = await commentRepository.GetCommentsByUserAsync(user.Id);
         
         userDetail.PostCount = posts.Count();
         userDetail.CommentCount = comments.Count();
@@ -71,9 +57,9 @@ public class UserService : IUserService
         return userDetail;
     }
 
-    public async Task<UserDetailResponse> UpdateUserRoleAsync(int userId, UpdateUserRoleRequest request)
+    public async Task<UserDetailResponse> UpdateUserRoleAsync(Guid userId, UpdateUserRoleRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
@@ -82,13 +68,13 @@ public class UserService : IUserService
         user.Role = request.Role;
         user.UpdatedAt = DateTime.UtcNow;
 
-        await _userRepository.UpdateAsync(user);
+        await userRepository.UpdateAsync(user);
         return await GetUserByIdAsync(userId);
     }
 
-    public async Task<UserDetailResponse> UpdateUserStatusAsync(int userId, UpdateUserStatusRequest request)
+    public async Task<UserDetailResponse> UpdateUserStatusAsync(Guid userId, UpdateUserStatusRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
@@ -97,20 +83,18 @@ public class UserService : IUserService
         user.IsActive = request.IsActive;
         user.UpdatedAt = DateTime.UtcNow;
 
-        await _userRepository.UpdateAsync(user);
+        await userRepository.UpdateAsync(user);
         return await GetUserByIdAsync(userId);
     }
 
-    public async Task<bool> DeleteUserAsync(int userId)
+    public async Task<bool> DeleteUserAsync(Guid userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
         }
 
-        // Instead of actually deleting, you might want to soft delete
-        // by setting IsActive to false and anonymizing data
         user.IsActive = false;
         user.Email = $"deleted_{userId}@example.com";
         user.Username = $"deleted_user_{userId}";
@@ -120,24 +104,20 @@ public class UserService : IUserService
         user.ProfilePictureUrl = null;
         user.UpdatedAt = DateTime.UtcNow;
 
-        await _userRepository.UpdateAsync(user);
+        await userRepository.UpdateAsync(user);
         return true;
-        
-        // Or if you want to actually delete the user:
-        // await _userRepository.DeleteAsync(userId);
-        // return true;
     }
 
-    public async Task<UserStatisticsResponse> GetUserStatisticsAsync(int userId)
+    public async Task<UserStatisticsResponse> GetUserStatisticsAsync(Guid userId)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user = await userRepository.GetByIdAsync(userId);
         if (user == null)
         {
             throw new ApplicationException("User not found");
         }
 
-        var posts = await _postRepository.GetPostsByAuthorAsync(userId);
-        var comments = await _commentRepository.GetCommentsByUserAsync(userId);
+        var posts = await postRepository.GetPostsByAuthorAsync(userId);
+        var comments = await commentRepository.GetCommentsByUserAsync(userId);
 
         return new UserStatisticsResponse
         {

@@ -16,7 +16,7 @@ public class Post : BaseEntity
     public bool IsFeatured { get; set; } = false;
         
     // Foreign keys
-    public int AuthorId { get; set; }
+    public Guid AuthorId { get; set; }
         
     // Navigation properties
     public User Author { get; set; }

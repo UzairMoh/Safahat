@@ -22,13 +22,12 @@ public class UsersController(IUserService userService) : BaseController
     /// <summary>
     /// Get user by ID - User can only access their own profile, Admin can access any
     /// </summary>
-    [HttpGet("{id:int}")]
+    [HttpGet("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
-    public async Task<ActionResult<UserDetailResponse>> GetUserById(int id)
+    public async Task<ActionResult<UserDetailResponse>> GetUserById(Guid id)
     {
         try
         {
-            // Check if user can access this resource
             if (!await UserCanAccessResourceAsync(id))
             {
                 return ForbidWithMessage();
@@ -54,7 +53,6 @@ public class UsersController(IUserService userService) : BaseController
         {
             var user = await userService.GetUserByUsernameAsync(username);
             
-            // Check if user can access this resource
             if (!await UserCanAccessResourceAsync(user.Id))
             {
                 return ForbidWithMessage();
@@ -71,9 +69,9 @@ public class UsersController(IUserService userService) : BaseController
     /// <summary>
     /// Update user role - Admin only
     /// </summary>
-    [HttpPut("{id:int}/role")]
+    [HttpPut("{id:guid}/role")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<UserDetailResponse>> UpdateUserRole(int id, [FromBody] UpdateUserRoleRequest request)
+    public async Task<ActionResult<UserDetailResponse>> UpdateUserRole(Guid id, [FromBody] UpdateUserRoleRequest request)
     {
         try
         {
@@ -89,9 +87,9 @@ public class UsersController(IUserService userService) : BaseController
     /// <summary>
     /// Update user status - Admin only
     /// </summary>
-    [HttpPut("{id:int}/status")]
+    [HttpPut("{id:guid}/status")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult<UserDetailResponse>> UpdateUserStatus(int id, [FromBody] UpdateUserStatusRequest request)
+    public async Task<ActionResult<UserDetailResponse>> UpdateUserStatus(Guid id, [FromBody] UpdateUserStatusRequest request)
     {
         try
         {
@@ -107,13 +105,12 @@ public class UsersController(IUserService userService) : BaseController
     /// <summary>
     /// Delete user - Admin only
     /// </summary>
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<ActionResult> DeleteUser(int id)
+    public async Task<ActionResult> DeleteUser(Guid id)
     {
         try
         {
-            // Prevent admin from deleting themselves
             if (id == UserId)
             {
                 return BadRequestWithMessage("Cannot delete your own account");
@@ -131,13 +128,12 @@ public class UsersController(IUserService userService) : BaseController
     /// <summary>
     /// Get user statistics - User can only access their own stats, Admin can access any
     /// </summary>
-    [HttpGet("{id:int}/statistics")]
+    [HttpGet("{id:guid}/statistics")]
     [Authorize(Policy = "AuthenticatedUser")]
-    public async Task<ActionResult<UserStatisticsResponse>> GetUserStatistics(int id)
+    public async Task<ActionResult<UserStatisticsResponse>> GetUserStatistics(Guid id)
     {
         try
         {
-            // Check if user can access this resource
             if (!await UserCanAccessResourceAsync(id))
             {
                 return ForbidWithMessage();

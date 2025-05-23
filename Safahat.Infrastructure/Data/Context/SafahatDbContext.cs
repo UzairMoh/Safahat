@@ -17,8 +17,6 @@ public class SafahatDbContext(DbContextOptions<SafahatDbContext> options) : DbCo
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-            
-        // Apply all entity configurations from this assembly
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
         

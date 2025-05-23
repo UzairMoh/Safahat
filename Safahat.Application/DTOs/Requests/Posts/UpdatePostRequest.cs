@@ -7,6 +7,6 @@ public class UpdatePostRequest
     public string Summary { get; set; }
     public string FeaturedImageUrl { get; set; }
     public bool AllowComments { get; set; }
-    public List<int> CategoryIds { get; set; } = new List<int>();
+    public List<Guid> CategoryIds { get; set; } = new List<Guid>();
     public List<string> Tags { get; set; } = new List<string>();
 }

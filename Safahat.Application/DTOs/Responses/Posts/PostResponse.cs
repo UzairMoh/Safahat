@@ -1,4 +1,5 @@
-﻿using Safahat.Application.DTOs.Responses.Categories;
+﻿using Safahat.Application.DTOs.Responses.Auth;
+using Safahat.Application.DTOs.Responses.Categories;
 using Safahat.Application.DTOs.Responses.Tags;
 using Safahat.Models.Enums;
 
@@ -6,7 +7,7 @@ namespace Safahat.Application.DTOs.Responses.Posts;
 
 public class PostResponse
 {
-    public int Id { get; set; }
+    public Guid Id { get; set; }
     public string Title { get; set; }
     public string Slug { get; set; }
     public string Content { get; set; }

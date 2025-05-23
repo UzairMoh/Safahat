@@ -5,18 +5,15 @@ namespace Safahat.Application.Interfaces;
 
 public interface ICommentService
 {
-    // Basic CRUD operations
-    Task<CommentResponse> GetByIdAsync(int id);
+    Task<CommentResponse> GetByIdAsync(Guid id);
     Task<IEnumerable<CommentResponse>> GetAllAsync();
-    Task<CommentResponse> CreateAsync(int userId, CreateCommentRequest request);
-    Task<CommentResponse> UpdateAsync(int commentId, int userId, UpdateCommentRequest request);
-    Task<bool> DeleteAsync(int commentId, int userId);
-        
-    // Specialized operations
-    Task<IEnumerable<CommentResponse>> GetCommentsByPostAsync(int postId);
-    Task<IEnumerable<CommentResponse>> GetCommentsByUserAsync(int userId);
+    Task<CommentResponse> CreateAsync(Guid userId, CreateCommentRequest request);
+    Task<CommentResponse> UpdateAsync(Guid commentId, Guid userId, UpdateCommentRequest request);
+    Task<bool> DeleteAsync(Guid commentId, Guid userId);
+    Task<IEnumerable<CommentResponse>> GetCommentsByPostAsync(Guid postId);
+    Task<IEnumerable<CommentResponse>> GetCommentsByUserAsync(Guid userId);
     Task<IEnumerable<CommentResponse>> GetPendingCommentsAsync();
-    Task<bool> ApproveCommentAsync(int commentId);
-    Task<bool> RejectCommentAsync(int commentId);
-    Task<CommentResponse> ReplyToCommentAsync(int parentCommentId, int userId, CreateCommentRequest request);
+    Task<bool> ApproveCommentAsync(Guid commentId);
+    Task<bool> RejectCommentAsync(Guid commentId);
+    Task<CommentResponse> ReplyToCommentAsync(Guid parentCommentId, Guid userId, CreateCommentRequest request);
 }
