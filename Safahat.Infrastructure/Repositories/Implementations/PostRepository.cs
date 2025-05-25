@@ -90,4 +90,16 @@ public class PostRepository(SafahatDbContext context) : Repository<Post>(context
             .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
+
+    public async Task<bool> SlugExistsAsync(string slug, Guid? excludePostId = null)
+    {
+        var query = DbSet.Where(p => p.Slug == slug);
+    
+        if (excludePostId.HasValue)
+        {
+            query = query.Where(p => p.Id != excludePostId.Value);
+        }
+    
+        return await query.AnyAsync();
+    }
 }

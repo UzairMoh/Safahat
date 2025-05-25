@@ -13,16 +13,18 @@ public class AuthController(IAuthService authService) : BaseController
     /// Login a user and return a JWT token
     /// </summary>
     [HttpPost("login")]
+    [ProducesResponseType(typeof(AuthResponse), 200)]
+    [ProducesResponseType(400)]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
     {
         try
         {
             var response = await authService.LoginAsync(request);
-            return Success(response);
+            return Ok(response);
         }
         catch (ApplicationException ex)
         {
-            return BadRequestWithMessage(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
@@ -30,16 +32,18 @@ public class AuthController(IAuthService authService) : BaseController
     /// Register a new user
     /// </summary>
     [HttpPost("register")]
+    [ProducesResponseType(typeof(AuthResponse), 201)]
+    [ProducesResponseType(400)]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
     {
         try
         {
             var response = await authService.RegisterAsync(request);
-            return CreatedWithMessage("User registered successfully", response);
+            return Created($"/api/auth/profile", response);
         }
         catch (ApplicationException ex)
         {
-            return BadRequestWithMessage(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
@@ -48,16 +52,19 @@ public class AuthController(IAuthService authService) : BaseController
     /// </summary>
     [HttpPost("change-password")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         try
         {
             var result = await authService.ChangePasswordAsync(UserId, request);
-            return Success(new { success = result });
+            return Ok(new { success = result });
         }
         catch (ApplicationException ex)
         {
-            return BadRequestWithMessage(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
@@ -66,16 +73,19 @@ public class AuthController(IAuthService authService) : BaseController
     /// </summary>
     [HttpGet("profile")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(UserResponse), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<UserResponse>> GetProfile()
     {
         try
         {
             var profile = await authService.GetUserProfileAsync(UserId);
-            return Success(profile);
+            return Ok(profile);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -84,16 +94,19 @@ public class AuthController(IAuthService authService) : BaseController
     /// </summary>
     [HttpPut("profile")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(UserResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<ActionResult<UserResponse>> UpdateProfile([FromBody] UpdateUserProfileRequest request)
     {
         try
         {
             var updatedProfile = await authService.UpdateUserProfileAsync(UserId, request);
-            return Success(updatedProfile);
+            return Ok(updatedProfile);
         }
         catch (ApplicationException ex)
         {
-            return BadRequestWithMessage(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 }

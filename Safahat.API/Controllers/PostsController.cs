@@ -16,7 +16,7 @@ public class PostsController(IPostService postService) : BaseController
     public async Task<ActionResult<IEnumerable<PostResponse>>> GetAllPosts()
     {
         var posts = await postService.GetAllAsync();
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -26,7 +26,7 @@ public class PostsController(IPostService postService) : BaseController
     public async Task<ActionResult<IEnumerable<PostResponse>>> GetPublishedPosts([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await postService.GetPublishedPostsAsync(pageNumber, pageSize);
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -38,11 +38,11 @@ public class PostsController(IPostService postService) : BaseController
         try
         {
             var post = await postService.GetByIdAsync(id);
-            return Success(post);
+            return Ok(post);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -55,11 +55,11 @@ public class PostsController(IPostService postService) : BaseController
         try
         {
             var post = await postService.GetBySlugAsync(slug);
-            return Success(post);
+            return Ok(post);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -77,7 +77,7 @@ public class PostsController(IPostService postService) : BaseController
             posts = posts.Where(p => p.Status == Models.Enums.PostStatus.Published);
         }
         
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -85,10 +85,13 @@ public class PostsController(IPostService postService) : BaseController
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(PostResponse), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<ActionResult<PostResponse>> CreatePost([FromBody] CreatePostRequest request)
     {
         var post = await postService.CreateAsync(UserId, request);
-        return CreatedWithMessage("Post created successfully", post);
+        return Created($"/api/posts/{post.Id}", post);
     }
     
     /// <summary>
@@ -104,15 +107,15 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return ForbidWithMessage("You don't have permission to edit this post");
+                return Forbid("You don't have permission to edit this post");
             }
             
             var updatedPost = await postService.UpdateAsync(id, request);
-            return Success(updatedPost);
+            return Ok(updatedPost);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -129,15 +132,15 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return ForbidWithMessage("You don't have permission to delete this post");
+                return Forbid("You don't have permission to delete this post");
             }
             
             var result = await postService.DeleteAsync(id);
-            return Success(new { deleted = result });
+            return Ok(new { deleted = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -149,11 +152,11 @@ public class PostsController(IPostService postService) : BaseController
     {
         if (string.IsNullOrEmpty(query))
         {
-            return BadRequestWithMessage("Search query cannot be empty");
+            return BadRequest("Search query cannot be empty");
         }
         
         var posts = await postService.SearchPostsAsync(query, pageNumber, pageSize);
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -163,7 +166,7 @@ public class PostsController(IPostService postService) : BaseController
     public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByCategory(Guid categoryId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await postService.GetPostsByCategoryAsync(categoryId, pageNumber, pageSize);
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -173,7 +176,7 @@ public class PostsController(IPostService postService) : BaseController
     public async Task<ActionResult<IEnumerable<PostResponse>>> GetPostsByTag(Guid tagId, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
         var posts = await postService.GetPostsByTagAsync(tagId, pageNumber, pageSize);
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -183,7 +186,7 @@ public class PostsController(IPostService postService) : BaseController
     public async Task<ActionResult<IEnumerable<PostResponse>>> GetFeaturedPosts()
     {
         var posts = await postService.GetFeaturedPostsAsync();
-        return Success(posts);
+        return Ok(posts);
     }
     
     /// <summary>
@@ -199,15 +202,15 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return ForbidWithMessage("You don't have permission to publish this post");
+                return Forbid("You don't have permission to publish this post");
             }
             
             var result = await postService.PublishPostAsync(id);
-            return Success(new { published = result });
+            return Ok(new { published = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -224,15 +227,15 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return ForbidWithMessage("You don't have permission to unpublish this post");
+                return Forbid("You don't have permission to unpublish this post");
             }
             
             var result = await postService.UnpublishPostAsync(id);
-            return Success(new { unpublished = result });
+            return Ok(new { unpublished = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -246,11 +249,11 @@ public class PostsController(IPostService postService) : BaseController
         try
         {
             var result = await postService.FeaturePostAsync(id);
-            return Success(new { featured = result });
+            return Ok(new { featured = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
     
@@ -264,11 +267,11 @@ public class PostsController(IPostService postService) : BaseController
         try
         {
             var result = await postService.UnfeaturePostAsync(id);
-            return Success(new { unfeatured = result });
+            return Ok(new { unfeatured = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 }

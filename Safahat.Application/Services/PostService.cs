@@ -51,7 +51,8 @@ public class PostService(
     {
         var post = mapper.Map<Post>(request);
         post.AuthorId = authorId;
-        post.Slug = GenerateSlug(request.Title);
+        
+        post.Slug = await GenerateUniqueSlugAsync(request.Title);
 
         if (!request.IsDraft)
         {
@@ -128,7 +129,7 @@ public class PostService(
 
         if (!string.IsNullOrEmpty(request.Title) && request.Title != post.Title)
         {
-            post.Slug = GenerateSlug(request.Title);
+            post.Slug = await GenerateUniqueSlugAsync(request.Title, post.Id);
         }
 
         if (request.CategoryIds != null)
@@ -328,8 +329,49 @@ public class PostService(
 
     #region Helper Methods
 
+    /// <summary>
+    /// Generates a unique slug by checking database and appending numbers if needed
+    /// </summary>
+    private async Task<string> GenerateUniqueSlugAsync(string title, Guid? excludePostId = null)
+    {
+        var baseSlug = GenerateSlug(title);
+        var slug = baseSlug;
+        var counter = 1;
+
+        // Keep checking until we find a unique slug
+        while (await IsSlugExistsAsync(slug, excludePostId))
+        {
+            slug = $"{baseSlug}-{counter}";
+            counter++;
+        }
+
+        return slug;
+    }
+
+    /// <summary>
+    /// Checks if a slug already exists in the database
+    /// </summary>
+    private async Task<bool> IsSlugExistsAsync(string slug, Guid? excludePostId = null)
+    {
+        var posts = await postRepository.GetAllAsync();
+        
+        if (excludePostId.HasValue)
+        {
+            // When updating, exclude the current post from the check
+            return posts.Any(p => p.Slug == slug && p.Id != excludePostId.Value);
+        }
+        
+        return posts.Any(p => p.Slug == slug);
+    }
+
+    /// <summary>
+    /// Generates a SEO-friendly slug from a title (unchanged from original)
+    /// </summary>
     private string GenerateSlug(string title)
     {
+        if (string.IsNullOrWhiteSpace(title))
+            return "untitled";
+
         string slug = title.ToLowerInvariant();
         slug = RemoveDiacritics(slug);
         slug = Regex.Replace(slug, @"\s", "-");
@@ -337,7 +379,7 @@ public class PostService(
         slug = Regex.Replace(slug, @"-+", "-");
         slug = slug.Trim('-');
         
-        return slug;
+        return string.IsNullOrEmpty(slug) ? "untitled" : slug;
     }
 
     private string RemoveDiacritics(string text)

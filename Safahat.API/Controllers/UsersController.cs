@@ -13,10 +13,13 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(IEnumerable<UserListItemResponse>), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
     public async Task<ActionResult<IEnumerable<UserListItemResponse>>> GetAllUsers()
     {
         var users = await userService.GetAllUsersAsync();
-        return Success(users);
+        return Ok(users);
     }
 
     /// <summary>
@@ -24,21 +27,25 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpGet("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(UserDetailResponse), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<UserDetailResponse>> GetUserById(Guid id)
     {
         try
         {
-            if (!await UserCanAccessResourceAsync(id))
+            if (!UserCanAccessResource(id))
             {
-                return ForbidWithMessage();
+                return Forbid();
             }
             
             var user = await userService.GetUserByIdAsync(id);
-            return Success(user);
+            return Ok(user);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -47,22 +54,26 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpGet("username/{username}")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(UserDetailResponse), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<UserDetailResponse>> GetUserByUsername(string username)
     {
         try
         {
             var user = await userService.GetUserByUsernameAsync(username);
             
-            if (!await UserCanAccessResourceAsync(user.Id))
+            if (!UserCanAccessResource(user.Id))
             {
-                return ForbidWithMessage();
+                return Forbid();
             }
             
-            return Success(user);
+            return Ok(user);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -71,16 +82,21 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpPut("{id:guid}/role")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(UserDetailResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<UserDetailResponse>> UpdateUserRole(Guid id, [FromBody] UpdateUserRoleRequest request)
     {
         try
         {
             var updatedUser = await userService.UpdateUserRoleAsync(id, request);
-            return Success(updatedUser);
+            return Ok(updatedUser);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -89,16 +105,21 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpPut("{id:guid}/status")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(UserDetailResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<UserDetailResponse>> UpdateUserStatus(Guid id, [FromBody] UpdateUserStatusRequest request)
     {
         try
         {
             var updatedUser = await userService.UpdateUserStatusAsync(id, request);
-            return Success(updatedUser);
+            return Ok(updatedUser);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -107,21 +128,26 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult> DeleteUser(Guid id)
     {
         try
         {
             if (id == UserId)
             {
-                return BadRequestWithMessage("Cannot delete your own account");
+                return BadRequest("Cannot delete your own account");
             }
             
             var result = await userService.DeleteUserAsync(id);
-            return Success(new { deleted = result });
+            return Ok(new { deleted = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -130,21 +156,25 @@ public class UsersController(IUserService userService) : BaseController
     /// </summary>
     [HttpGet("{id:guid}/statistics")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(UserStatisticsResponse), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<UserStatisticsResponse>> GetUserStatistics(Guid id)
     {
         try
         {
-            if (!await UserCanAccessResourceAsync(id))
+            if (!UserCanAccessResource(id))
             {
-                return ForbidWithMessage();
+                return Forbid();
             }
             
             var statistics = await userService.GetUserStatisticsAsync(id);
-            return Success(statistics);
+            return Ok(statistics);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 }

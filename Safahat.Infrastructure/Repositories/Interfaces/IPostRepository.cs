@@ -11,4 +11,5 @@ public interface IPostRepository : IRepository<Post>
     Task<IEnumerable<Post>> SearchPostsAsync(string searchTerm);
     Task<IEnumerable<Post>> GetPostsByCategoryAsync(Guid categoryId);
     Task<IEnumerable<Post>> GetPostsByTagAsync(Guid tagId);
+    Task<bool> SlugExistsAsync(string slug, Guid? excludePostId = null);
 }

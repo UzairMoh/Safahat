@@ -13,26 +13,31 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(IEnumerable<CommentResponse>), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
     public async Task<ActionResult<IEnumerable<CommentResponse>>> GetAllComments()
     {
         var comments = await commentService.GetAllAsync();
-        return Success(comments);
+        return Ok(comments);
     }
 
     /// <summary>
     /// Get comment by ID
     /// </summary>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(CommentResponse), 200)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<CommentResponse>> GetCommentById(Guid id)
     {
         try
         {
             var comment = await commentService.GetByIdAsync(id);
-            return Success(comment);
+            return Ok(comment);
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -40,10 +45,11 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// Get comments by post ID
     /// </summary>
     [HttpGet("post/{postId:guid}")]
+    [ProducesResponseType(typeof(IEnumerable<CommentResponse>), 200)]
     public async Task<ActionResult<IEnumerable<CommentResponse>>> GetCommentsByPost(Guid postId)
     {
         var comments = await commentService.GetCommentsByPostAsync(postId);
-        return Success(comments);
+        return Ok(comments);
     }
 
     /// <summary>
@@ -51,16 +57,19 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpGet("user/{userId:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(IEnumerable<CommentResponse>), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
     public async Task<ActionResult<IEnumerable<CommentResponse>>> GetCommentsByUser(Guid userId)
     {
         // Check if user can access this resource
-        if (!await UserCanAccessResourceAsync(userId))
+        if (!UserCanAccessResource(userId))
         {
-            return ForbidWithMessage();
+            return Forbid();
         }
 
         var comments = await commentService.GetCommentsByUserAsync(userId);
-        return Success(comments);
+        return Ok(comments);
     }
 
     /// <summary>
@@ -68,10 +77,13 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpGet("pending")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(typeof(IEnumerable<CommentResponse>), 200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
     public async Task<ActionResult<IEnumerable<CommentResponse>>> GetPendingComments()
     {
         var comments = await commentService.GetPendingCommentsAsync();
-        return Success(comments);
+        return Ok(comments);
     }
 
     /// <summary>
@@ -79,16 +91,19 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(CommentResponse), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<ActionResult<CommentResponse>> CreateComment([FromBody] CreateCommentRequest request)
     {
         try
         {
             var comment = await commentService.CreateAsync(UserId, request);
-            return CreatedWithMessage("Comment created successfully", comment);
+            return Created($"/api/comments/{comment.Id}", comment);
         }
         catch (ApplicationException ex)
         {
-            return BadRequestWithMessage(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
@@ -97,16 +112,19 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpPost("{parentCommentId:guid}/reply")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(CommentResponse), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
     public async Task<ActionResult<CommentResponse>> ReplyToComment(Guid parentCommentId, [FromBody] CreateCommentRequest request)
     {
         try
         {
             var reply = await commentService.ReplyToCommentAsync(parentCommentId, UserId, request);
-            return CreatedWithMessage("Reply created successfully", reply);
+            return Created($"/api/comments/{reply.Id}", reply);
         }
         catch (ApplicationException ex)
         {
-            return BadRequestWithMessage(ex.Message);
+            return BadRequest(ex.Message);
         }
     }
 
@@ -115,18 +133,23 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(typeof(CommentResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult<CommentResponse>> UpdateComment(Guid id, [FromBody] UpdateCommentRequest request)
     {
         try
         {
             var updatedComment = await commentService.UpdateAsync(id, UserId, request);
-            return Success(updatedComment);
+            return Ok(updatedComment);
         }
         catch (ApplicationException ex)
         {
             return ex.Message.Contains("not found") 
-                ? NotFoundWithMessage(ex.Message) 
-                : ForbidWithMessage(ex.Message);
+                ? NotFound(ex.Message) 
+                : Forbid(ex.Message);
         }
     }
 
@@ -135,18 +158,22 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult> DeleteComment(Guid id)
     {
         try
         {
             var result = await commentService.DeleteAsync(id, UserId);
-            return Success(new { deleted = result });
+            return Ok(new { deleted = result });
         }
         catch (ApplicationException ex)
         {
             return ex.Message.Contains("not found") 
-                ? NotFoundWithMessage(ex.Message) 
-                : ForbidWithMessage(ex.Message);
+                ? NotFound(ex.Message) 
+                : Forbid(ex.Message);
         }
     }
 
@@ -155,16 +182,20 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpPut("{id:guid}/approve")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult> ApproveComment(Guid id)
     {
         try
         {
             var result = await commentService.ApproveCommentAsync(id);
-            return Success(new { approved = result });
+            return Ok(new { approved = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 
@@ -173,16 +204,20 @@ public class CommentsController(ICommentService commentService) : BaseController
     /// </summary>
     [HttpPut("{id:guid}/reject")]
     [Authorize(Policy = "AdminOnly")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(401)]
+    [ProducesResponseType(403)]
+    [ProducesResponseType(404)]
     public async Task<ActionResult> RejectComment(Guid id)
     {
         try
         {
             var result = await commentService.RejectCommentAsync(id);
-            return Success(new { rejected = result });
+            return Ok(new { rejected = result });
         }
         catch (ApplicationException ex)
         {
-            return NotFoundWithMessage(ex.Message);
+            return NotFound(ex.Message);
         }
     }
 }
