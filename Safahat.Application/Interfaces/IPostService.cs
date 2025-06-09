@@ -1,4 +1,5 @@
-﻿using Safahat.Application.DTOs.Requests.Posts;
+﻿using Microsoft.AspNetCore.Http;
+using Safahat.Application.DTOs.Requests.Posts;
 using Safahat.Application.DTOs.Responses.Posts;
 
 namespace Safahat.Application.Interfaces;
@@ -6,7 +7,7 @@ namespace Safahat.Application.Interfaces;
 public interface IPostService
 {
     Task<PostResponse> GetByIdAsync(Guid id);
-    Task<PostResponse> GetBySlugAsync(string slug);
+    Task<PostResponse> GetBySlugAsync(string slug, ISession session);
     Task<IEnumerable<PostResponse>> GetAllAsync();
     Task<PostResponse> CreateAsync(Guid authorId, CreatePostRequest request);
     Task<PostResponse> UpdateAsync(Guid postId, UpdatePostRequest request);

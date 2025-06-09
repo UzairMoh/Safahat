@@ -54,7 +54,7 @@ public class PostsController(IPostService postService) : BaseController
     {
         try
         {
-            var post = await postService.GetBySlugAsync(slug);
+            var post = await postService.GetBySlugAsync(slug, HttpContext.Session);
             return Ok(post);
         }
         catch (ApplicationException ex)

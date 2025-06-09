@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FluentAssertions;
+using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Safahat.Application.DTOs.Requests.Posts;
 using Safahat.Application.DTOs.Responses.Posts;
@@ -17,6 +18,7 @@ public class PostServiceTests
     private readonly ITagRepository _tagRepository;
     private readonly IMapper _mapper;
     private readonly PostService _postService;
+    private readonly ISession _session;
 
     public PostServiceTests()
     {
@@ -24,6 +26,7 @@ public class PostServiceTests
         _categoryRepository = Substitute.For<ICategoryRepository>();
         _tagRepository = Substitute.For<ITagRepository>();
         _mapper = Substitute.For<IMapper>();
+        _session = Substitute.For<ISession>();
         
         _postService = new PostService(
             _postRepository,
@@ -128,7 +131,7 @@ public class PostServiceTests
         _mapper.Map<PostResponse>(Arg.Any<Post>()).Returns(expectedResponse);
 
         // Act
-        var result = await _postService.GetBySlugAsync(slug);
+        var result = await _postService.GetBySlugAsync(slug, _session);
 
         // Assert
         result.Should().NotBeNull();
@@ -147,7 +150,7 @@ public class PostServiceTests
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApplicationException>(
-            () => _postService.GetBySlugAsync(slug)
+            () => _postService.GetBySlugAsync(slug, _session)
         );
 
         exception.Message.Should().Be("Post not found");

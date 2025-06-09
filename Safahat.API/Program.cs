@@ -1,6 +1,9 @@
+using Microsoft.EntityFrameworkCore;
 using Safahat.Extensions;
 using Safahat.Application;
 using Safahat.Infrastructure;
+using Safahat.Infrastructure.Data;
+using Safahat.Infrastructure.Data.Context; // Add this - adjust namespace if needed
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +22,24 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication(); 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        // Replace 'ApplicationDbContext' with your actual DbContext name
+        var context = scope.ServiceProvider.GetRequiredService<SafahatDbContext>();
+        
+        Console.WriteLine("Applying database migrations...");
+        await context.Database.MigrateAsync();
+        Console.WriteLine("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error applying migrations: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    }
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
