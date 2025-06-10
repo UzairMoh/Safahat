@@ -63,7 +63,7 @@ public class PostsController(IPostService postService) : BaseController
     {
         try
         {
-            var post = await postService.GetBySlugAsync(slug, HttpContext.Session);
+            var post = await postService.GetBySlugAsync(slug);
             return Ok(post);
         }
         catch (ApplicationException ex)
@@ -203,7 +203,7 @@ public class PostsController(IPostService postService) : BaseController
     }
     
     /// <summary>
-    /// Retrieves all featured posts
+    /// Get featured posts
     /// </summary>
     [HttpGet("featured")]
     [ProducesResponseType(typeof(IEnumerable<PostResponse>), 200)]

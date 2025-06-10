@@ -1,6 +1,5 @@
 ﻿using System.Text.RegularExpressions;
 using AutoMapper;
-using Microsoft.AspNetCore.Http;
 using Safahat.Application.DTOs.Requests.Posts;
 using Safahat.Application.DTOs.Responses.Posts;
 using Safahat.Application.Interfaces;
@@ -28,7 +27,7 @@ public class PostService(
         return mapper.Map<PostResponse>(post);
     }
 
-    public async Task<PostResponse> GetBySlugAsync(string slug, ISession session)
+    public async Task<PostResponse> GetBySlugAsync(string slug)
     {
         var post = await postRepository.GetPostBySlugAsync(slug);
         if (post == null)
@@ -36,24 +35,8 @@ public class PostService(
             throw new ApplicationException("Post not found");
         }
 
-        var sessionKey = $"last_viewed_{post.Id}";
-        var lastViewedStr = session.GetString(sessionKey);
-
-        if (DateTime.TryParse(lastViewedStr, out var lastViewed))
-        {
-            if (DateTime.UtcNow.Subtract(lastViewed).TotalMinutes > 30)
-            {
-                post.ViewCount++;
-                await postRepository.UpdateAsync(post);
-                session.SetString(sessionKey, DateTime.UtcNow.ToString());
-            }
-        }
-        else
-        {
-            post.ViewCount++;
-            await postRepository.UpdateAsync(post);
-            session.SetString(sessionKey, DateTime.UtcNow.ToString());
-        }
+        post.ViewCount++;
+        await postRepository.UpdateAsync(post);
 
         return mapper.Map<PostResponse>(post);
     }
