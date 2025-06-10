@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace Safahat.Extensions;
 
@@ -8,6 +9,20 @@ public static class SwaggerExtensions
     {
         services.AddSwaggerGen(c =>
         {
+            c.SwaggerDoc("v1", new OpenApiInfo 
+            { 
+                Title = "Safahat API", 
+                Version = "v1",
+                Description = "A comprehensive blog management API"
+            });
+
+            var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            if (File.Exists(xmlPath))
+            {
+                c.IncludeXmlComments(xmlPath);
+            }
+
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",

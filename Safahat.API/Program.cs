@@ -3,7 +3,7 @@ using Safahat.Extensions;
 using Safahat.Application;
 using Safahat.Infrastructure;
 using Safahat.Infrastructure.Data;
-using Safahat.Infrastructure.Data.Context; // Add this - adjust namespace if needed
+using Safahat.Infrastructure.Data.Context;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +19,7 @@ builder.Services.AddCorsConfiguration();
 
 // Project-specific services
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddApplication(); 
+builder.Services.AddApplication();
 
 var app = builder.Build();
 
@@ -27,7 +27,6 @@ using (var scope = app.Services.CreateScope())
 {
     try
     {
-        // Replace 'ApplicationDbContext' with your actual DbContext name
         var context = scope.ServiceProvider.GetRequiredService<SafahatDbContext>();
         
         Console.WriteLine("Applying database migrations...");

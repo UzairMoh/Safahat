@@ -6,10 +6,11 @@ using Safahat.Application.Interfaces;
 
 namespace Safahat.Controllers;
 
+[Produces("application/json")]
 public class TagsController(ITagService tagService) : BaseController
 {
     /// <summary>
-    /// Get all tags
+    /// Retrieves all tags
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<TagResponse>), 200)]
@@ -20,7 +21,7 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Get tags with post count
+    /// Retrieves tags with post counts
     /// </summary>
     [HttpGet("with-post-count")]
     [ProducesResponseType(typeof(IEnumerable<TagResponse>), 200)]
@@ -31,7 +32,7 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Get popular tags
+    /// Retrieves popular tags by usage count
     /// </summary>
     [HttpGet("popular")]
     [ProducesResponseType(typeof(IEnumerable<TagResponse>), 200)]
@@ -42,7 +43,7 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Get tag by ID
+    /// Retrieves a specific tag by ID
     /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(TagResponse), 200)]
@@ -61,7 +62,7 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Get tag by slug
+    /// Retrieves a specific tag by slug
     /// </summary>
     [HttpGet("slug/{slug}")]
     [ProducesResponseType(typeof(TagResponse), 200)]
@@ -80,7 +81,7 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Create a new tag - Admin only
+    /// Creates a new tag (Admin only)
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]
@@ -102,7 +103,7 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Update a tag - Admin only
+    /// Updates an existing tag (Admin only)
     /// </summary>
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
@@ -125,11 +126,11 @@ public class TagsController(ITagService tagService) : BaseController
     }
 
     /// <summary>
-    /// Delete a tag - Admin only
+    /// Deletes a tag (Admin only)
     /// </summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
     [ProducesResponseType(404)]
@@ -137,8 +138,8 @@ public class TagsController(ITagService tagService) : BaseController
     {
         try
         {
-            var result = await tagService.DeleteAsync(id);
-            return Ok(new { deleted = result });
+            await tagService.DeleteAsync(id);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {

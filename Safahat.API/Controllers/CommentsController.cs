@@ -6,10 +6,11 @@ using Safahat.Application.Interfaces;
 
 namespace Safahat.Controllers;
 
+[Produces("application/json")]
 public class CommentsController(ICommentService commentService) : BaseController
 {
     /// <summary>
-    /// Get all comments - Admin only
+    /// Retrieves all comments (Admin only)
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
@@ -23,7 +24,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Get comment by ID
+    /// Retrieves a specific comment by ID
     /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CommentResponse), 200)]
@@ -42,7 +43,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Get comments by post ID
+    /// Retrieves all comments for a specific post
     /// </summary>
     [HttpGet("post/{postId:guid}")]
     [ProducesResponseType(typeof(IEnumerable<CommentResponse>), 200)]
@@ -53,7 +54,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Get comments by user ID - User can only access their own comments, Admin can access any
+    /// Retrieves comments by user
     /// </summary>
     [HttpGet("user/{userId:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -62,7 +63,6 @@ public class CommentsController(ICommentService commentService) : BaseController
     [ProducesResponseType(403)]
     public async Task<ActionResult<IEnumerable<CommentResponse>>> GetCommentsByUser(Guid userId)
     {
-        // Check if user can access this resource
         if (!UserCanAccessResource(userId))
         {
             return Forbid();
@@ -73,7 +73,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Get pending comments for moderation - Admin only
+    /// Retrieves pending comments for moderation (Admin only)
     /// </summary>
     [HttpGet("pending")]
     [Authorize(Policy = "AdminOnly")]
@@ -87,7 +87,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Create a comment - Authenticated users only
+    /// Creates a new comment
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -108,7 +108,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Reply to a comment - Authenticated users only
+    /// Creates a reply to an existing comment
     /// </summary>
     [HttpPost("{parentCommentId:guid}/reply")]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -129,7 +129,7 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Update a comment - Author only
+    /// Updates an existing comment
     /// </summary>
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -154,11 +154,11 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Delete a comment - Author, Post Author, or Admin only
+    /// Deletes a comment
     /// </summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
     [ProducesResponseType(404)]
@@ -166,8 +166,8 @@ public class CommentsController(ICommentService commentService) : BaseController
     {
         try
         {
-            var result = await commentService.DeleteAsync(id, UserId);
-            return Ok(new { deleted = result });
+            await commentService.DeleteAsync(id, UserId);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {
@@ -178,11 +178,11 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Approve a comment - Admin only
+    /// Approves a pending comment (Admin only)
     /// </summary>
     [HttpPut("{id:guid}/approve")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
     [ProducesResponseType(404)]
@@ -190,8 +190,8 @@ public class CommentsController(ICommentService commentService) : BaseController
     {
         try
         {
-            var result = await commentService.ApproveCommentAsync(id);
-            return Ok(new { approved = result });
+            await commentService.ApproveCommentAsync(id);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {
@@ -200,11 +200,11 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Reject a comment - Admin only
+    /// Rejects a pending comment (Admin only)
     /// </summary>
     [HttpPut("{id:guid}/reject")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
     [ProducesResponseType(404)]
@@ -212,8 +212,8 @@ public class CommentsController(ICommentService commentService) : BaseController
     {
         try
         {
-            var result = await commentService.RejectCommentAsync(id);
-            return Ok(new { rejected = result });
+            await commentService.RejectCommentAsync(id);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {

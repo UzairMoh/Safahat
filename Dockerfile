@@ -5,12 +5,11 @@ WORKDIR /src
 # Copy solution file
 COPY *.sln .
 
-# Copy project files (adjust these paths based on your actual project structure)
+# Copy project files
 COPY Safahat.API/*.csproj ./Safahat.API/
 COPY Safahat.Application/*.csproj ./Safahat.Application/
 COPY Safahat.Infrastructure/*.csproj ./Safahat.Infrastructure/
 COPY Safahat.Models/*.csproj ./Safahat.Models/
-COPY Safahat.Common/*.csproj ./Safahat.Common/
 COPY Safahat.Tests/*.csproj ./Safahat.Tests/
 
 # Restore dependencies

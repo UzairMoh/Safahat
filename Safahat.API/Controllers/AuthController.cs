@@ -7,10 +7,11 @@ using Safahat.Application.Interfaces;
 
 namespace Safahat.Controllers;
 
+[Produces("application/json")]
 public class AuthController(IAuthService authService) : BaseController
 {
     /// <summary>
-    /// Login a user and return a JWT token
+    /// Authenticates user and returns JWT token
     /// </summary>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponse), 200)]
@@ -29,7 +30,7 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     /// <summary>
-    /// Register a new user
+    /// Registers a new user account
     /// </summary>
     [HttpPost("register")]
     [ProducesResponseType(typeof(AuthResponse), 201)]
@@ -48,19 +49,19 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     /// <summary>
-    /// Change a user's password
+    /// Changes the authenticated user's password
     /// </summary>
     [HttpPost("change-password")]
     [Authorize(Policy = "AuthenticatedUser")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     public async Task<ActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
         try
         {
-            var result = await authService.ChangePasswordAsync(UserId, request);
-            return Ok(new { success = result });
+            await authService.ChangePasswordAsync(UserId, request);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {
@@ -69,7 +70,7 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     /// <summary>
-    /// Get the authenticated user's profile
+    /// Retrieves the authenticated user's profile
     /// </summary>
     [HttpGet("profile")]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -90,7 +91,7 @@ public class AuthController(IAuthService authService) : BaseController
     }
 
     /// <summary>
-    /// Update the authenticated user's profile
+    /// Updates the authenticated user's profile
     /// </summary>
     [HttpPut("profile")]
     [Authorize(Policy = "AuthenticatedUser")]

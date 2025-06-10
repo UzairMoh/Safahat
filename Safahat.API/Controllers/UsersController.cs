@@ -6,10 +6,11 @@ using Safahat.Application.Interfaces;
 
 namespace Safahat.Controllers;
 
+[Produces("application/json")]
 public class UsersController(IUserService userService) : BaseController
 {
     /// <summary>
-    /// Get all users - Admin only
+    /// Retrieves all users (Admin only)
     /// </summary>
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
@@ -23,7 +24,7 @@ public class UsersController(IUserService userService) : BaseController
     }
 
     /// <summary>
-    /// Get user by ID - User can only access their own profile, Admin can access any
+    /// Retrieves a specific user by ID
     /// </summary>
     [HttpGet("{id:guid}")]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -50,7 +51,7 @@ public class UsersController(IUserService userService) : BaseController
     }
 
     /// <summary>
-    /// Get user by username
+    /// Retrieves a specific user by username
     /// </summary>
     [HttpGet("username/{username}")]
     [Authorize(Policy = "AuthenticatedUser")]
@@ -78,7 +79,7 @@ public class UsersController(IUserService userService) : BaseController
     }
 
     /// <summary>
-    /// Update user role - Admin only
+    /// Updates a user's role (Admin only)
     /// </summary>
     [HttpPut("{id:guid}/role")]
     [Authorize(Policy = "AdminOnly")]
@@ -101,7 +102,7 @@ public class UsersController(IUserService userService) : BaseController
     }
 
     /// <summary>
-    /// Update user status - Admin only
+    /// Updates a user's status (Admin only)
     /// </summary>
     [HttpPut("{id:guid}/status")]
     [Authorize(Policy = "AdminOnly")]
@@ -124,11 +125,11 @@ public class UsersController(IUserService userService) : BaseController
     }
 
     /// <summary>
-    /// Delete user - Admin only
+    /// Deletes a user (Admin only)
     /// </summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(400)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
@@ -142,8 +143,8 @@ public class UsersController(IUserService userService) : BaseController
                 return BadRequest("Cannot delete your own account");
             }
             
-            var result = await userService.DeleteUserAsync(id);
-            return Ok(new { deleted = result });
+            await userService.DeleteUserAsync(id);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {
@@ -152,7 +153,7 @@ public class UsersController(IUserService userService) : BaseController
     }
 
     /// <summary>
-    /// Get user statistics - User can only access their own stats, Admin can access any
+    /// Retrieves user statistics
     /// </summary>
     [HttpGet("{id:guid}/statistics")]
     [Authorize(Policy = "AuthenticatedUser")]

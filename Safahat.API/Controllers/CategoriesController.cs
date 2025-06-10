@@ -6,10 +6,11 @@ using Safahat.Application.Interfaces;
 
 namespace Safahat.Controllers;
 
+[Produces("application/json")]
 public class CategoriesController(ICategoryService categoryService) : BaseController
 {
     /// <summary>
-    /// Get all categories
+    /// Retrieves all categories
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), 200)]
@@ -20,7 +21,7 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     }
 
     /// <summary>
-    /// Get categories with post count
+    /// Retrieves categories with post counts
     /// </summary>
     [HttpGet("with-post-count")]
     [ProducesResponseType(typeof(IEnumerable<CategoryResponse>), 200)]
@@ -31,7 +32,7 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     }
 
     /// <summary>
-    /// Get category by ID
+    /// Retrieves a specific category by ID
     /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CategoryResponse), 200)]
@@ -50,7 +51,7 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     }
 
     /// <summary>
-    /// Get category by slug
+    /// Retrieves a specific category by slug
     /// </summary>
     [HttpGet("slug/{slug}")]
     [ProducesResponseType(typeof(CategoryResponse), 200)]
@@ -69,7 +70,7 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     }
 
     /// <summary>
-    /// Create a new category - Admin only
+    /// Creates a new category (Admin only)
     /// </summary>
     [HttpPost]
     [Authorize(Policy = "AdminOnly")]
@@ -91,7 +92,7 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     }
 
     /// <summary>
-    /// Update a category - Admin only
+    /// Updates an existing category (Admin only)
     /// </summary>
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
@@ -114,11 +115,11 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     }
 
     /// <summary>
-    /// Delete a category - Admin only
+    /// Deletes a category (Admin only)
     /// </summary>
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(401)]
     [ProducesResponseType(403)]
     [ProducesResponseType(404)]
@@ -126,8 +127,8 @@ public class CategoriesController(ICategoryService categoryService) : BaseContro
     {
         try
         {
-            var result = await categoryService.DeleteAsync(id);
-            return Ok(new { deleted = result });
+            await categoryService.DeleteAsync(id);
+            return NoContent();
         }
         catch (ApplicationException ex)
         {
