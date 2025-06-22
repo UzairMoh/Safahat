@@ -9,7 +9,10 @@ public static class CorsExtensions
             options.AddPolicy("AllowReactApp", builder =>
             {
                 builder
-                    .WithOrigins("http://localhost:5173")
+                    .WithOrigins(
+                        "http://localhost:5173",
+                        "https://safahat-client-production.up.railway.app"
+                    )
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();
