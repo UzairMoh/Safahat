@@ -10,7 +10,8 @@ public static class CorsExtensions
             {
                 builder
                     .WithOrigins(
-                        "https://safahat.up.railway.app"
+                        "http://localhost:5173",
+                        "https://safahat-client-production.up.railway.app"
                     )
                     .AllowAnyMethod()
                     .AllowAnyHeader()
