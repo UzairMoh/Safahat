@@ -5,22 +5,26 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>Safahat</RootNamespace>
+
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+        <NoWarn>$(NoWarn);1591</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.5">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Safahat.Application\Safahat.Application.csproj" />
-      <ProjectReference Include="..\Safahat.Infrastructure\Safahat.Infrastructure.csproj" />
-      <ProjectReference Include="..\Safahat.Models\Safahat.Models.csproj" />
+        <ProjectReference Include="..\Safahat.Application\Safahat.Application.csproj" />
+        <ProjectReference Include="..\Safahat.Infrastructure\Safahat.Infrastructure.csproj" />
+        <ProjectReference Include="..\Safahat.Models\Safahat.Models.csproj" />
     </ItemGroup>
 
 </Project>
