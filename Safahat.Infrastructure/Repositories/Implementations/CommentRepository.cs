@@ -10,7 +10,7 @@ public class CommentRepository(SafahatDbContext context) : Repository<Comment>(c
     public async Task<IEnumerable<Comment>> GetCommentsByPostAsync(Guid postId)
     {
         return await DbSet
-            .Where(c => c.PostId == postId && c.IsApproved)
+            .Where(c => c.PostId == postId)
             .Include(c => c.User)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
@@ -21,16 +21,6 @@ public class CommentRepository(SafahatDbContext context) : Repository<Comment>(c
         return await DbSet
             .Where(c => c.UserId == userId)
             .Include(c => c.Post)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Comment>> GetPendingCommentsAsync()
-    {
-        return await DbSet
-            .Where(c => !c.IsApproved)
-            .Include(c => c.Post)
-            .Include(c => c.User)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();
     }

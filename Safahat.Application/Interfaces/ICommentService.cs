@@ -9,11 +9,8 @@ public interface ICommentService
     Task<IEnumerable<CommentResponse>> GetAllAsync();
     Task<CommentResponse> CreateAsync(Guid userId, CreateCommentRequest request);
     Task<CommentResponse> UpdateAsync(Guid commentId, Guid userId, UpdateCommentRequest request);
-    Task<bool> DeleteAsync(Guid commentId, Guid userId);
+    Task<bool> DeleteAsync(Guid commentId, Guid userId, bool isAdmin = false);
     Task<IEnumerable<CommentResponse>> GetCommentsByPostAsync(Guid postId);
     Task<IEnumerable<CommentResponse>> GetCommentsByUserAsync(Guid userId);
-    Task<IEnumerable<CommentResponse>> GetPendingCommentsAsync();
-    Task<bool> ApproveCommentAsync(Guid commentId);
-    Task<bool> RejectCommentAsync(Guid commentId);
     Task<CommentResponse> ReplyToCommentAsync(Guid parentCommentId, Guid userId, CreateCommentRequest request);
 }

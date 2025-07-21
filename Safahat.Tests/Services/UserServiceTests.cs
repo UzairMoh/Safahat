@@ -404,17 +404,8 @@ public class UserServiceTests
             new Post { Id = Guid.NewGuid(), AuthorId = userId, Status = PostStatus.Draft }
         };
 
-        var comments = new List<Comment>
-        {
-            new Comment { Id = Guid.NewGuid(), UserId = userId, IsApproved = true },
-            new Comment { Id = Guid.NewGuid(), UserId = userId, IsApproved = true },
-            new Comment { Id = Guid.NewGuid(), UserId = userId, IsApproved = false },
-            new Comment { Id = Guid.NewGuid(), UserId = userId, IsApproved = false }
-        };
-
         _userRepository.GetByIdAsync(userId).Returns(user);
         _postRepository.GetPostsByAuthorAsync(userId).Returns(posts);
-        _commentRepository.GetCommentsByUserAsync(userId).Returns(comments);
 
         // Act
         var result = await _userService.GetUserStatisticsAsync(userId);

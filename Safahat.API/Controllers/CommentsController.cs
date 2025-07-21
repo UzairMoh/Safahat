@@ -73,20 +73,6 @@ public class CommentsController(ICommentService commentService) : BaseController
     }
 
     /// <summary>
-    /// Retrieves pending comments for moderation (Admin only)
-    /// </summary>
-    [HttpGet("pending")]
-    [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(typeof(IEnumerable<CommentResponse>), 200)]
-    [ProducesResponseType(401)]
-    [ProducesResponseType(403)]
-    public async Task<ActionResult<IEnumerable<CommentResponse>>> GetPendingComments()
-    {
-        var comments = await commentService.GetPendingCommentsAsync();
-        return Ok(comments);
-    }
-
-    /// <summary>
     /// Creates a new comment
     /// </summary>
     [HttpPost]
@@ -147,9 +133,13 @@ public class CommentsController(ICommentService commentService) : BaseController
         }
         catch (ApplicationException ex)
         {
-            return ex.Message.Contains("not found") 
-                ? NotFound(ex.Message) 
-                : Forbid(ex.Message);
+            if (ex.Message.Contains("not found"))
+                return NotFound(new { message = ex.Message });
+            
+            if (ex.Message.Contains("not authorized"))
+                return Forbid();
+                
+            return BadRequest(new { message = ex.Message });
         }
     }
 
@@ -166,58 +156,18 @@ public class CommentsController(ICommentService commentService) : BaseController
     {
         try
         {
-            await commentService.DeleteAsync(id, UserId);
+            await commentService.DeleteAsync(id, UserId, IsAdmin);
             return NoContent();
         }
         catch (ApplicationException ex)
         {
-            return ex.Message.Contains("not found") 
-                ? NotFound(ex.Message) 
-                : Forbid(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// Approves a pending comment (Admin only)
-    /// </summary>
-    [HttpPut("{id:guid}/approve")]
-    [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(401)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
-    public async Task<ActionResult> ApproveComment(Guid id)
-    {
-        try
-        {
-            await commentService.ApproveCommentAsync(id);
-            return NoContent();
-        }
-        catch (ApplicationException ex)
-        {
-            return NotFound(ex.Message);
-        }
-    }
-
-    /// <summary>
-    /// Rejects a pending comment (Admin only)
-    /// </summary>
-    [HttpPut("{id:guid}/reject")]
-    [Authorize(Policy = "AdminOnly")]
-    [ProducesResponseType(204)]
-    [ProducesResponseType(401)]
-    [ProducesResponseType(403)]
-    [ProducesResponseType(404)]
-    public async Task<ActionResult> RejectComment(Guid id)
-    {
-        try
-        {
-            await commentService.RejectCommentAsync(id);
-            return NoContent();
-        }
-        catch (ApplicationException ex)
-        {
-            return NotFound(ex.Message);
+            if (ex.Message.Contains("not found"))
+                return NotFound(new { message = ex.Message });
+            
+            if (ex.Message.Contains("not authorized"))
+                return Forbid();
+                
+            return BadRequest(new { message = ex.Message });
         }
     }
 }

@@ -66,7 +66,6 @@ public class CommentService(
 
         var comment = mapper.Map<Comment>(request);
         comment.UserId = userId;
-        comment.IsApproved = true;
 
         var createdComment = await commentRepository.AddAsync(comment);
         return mapper.Map<CommentResponse>(createdComment);
@@ -87,13 +86,12 @@ public class CommentService(
 
         mapper.Map(request, comment);
         comment.UpdatedAt = DateTime.UtcNow;
-        comment.IsApproved = false;
 
         await commentRepository.UpdateAsync(comment);
         return mapper.Map<CommentResponse>(comment);
     }
 
-    public async Task<bool> DeleteAsync(Guid commentId, Guid userId)
+    public async Task<bool> DeleteAsync(Guid commentId, Guid userId, bool isAdmin = false)
     {
         var comment = await commentRepository.GetByIdAsync(commentId);
         if (comment == null)
@@ -101,7 +99,8 @@ public class CommentService(
             throw new ApplicationException("Comment not found");
         }
 
-        if (comment.UserId != userId)
+        // Allow deletion if user is the author OR user is an admin
+        if (comment.UserId != userId && !isAdmin)
         {
             throw new ApplicationException("You are not authorized to delete this comment");
         }
@@ -120,39 +119,6 @@ public class CommentService(
     {
         var comments = await commentRepository.GetCommentsByUserAsync(userId);
         return mapper.Map<IEnumerable<CommentResponse>>(comments);
-    }
-
-    public async Task<IEnumerable<CommentResponse>> GetPendingCommentsAsync()
-    {
-        var comments = await commentRepository.GetPendingCommentsAsync();
-        return mapper.Map<IEnumerable<CommentResponse>>(comments);
-    }
-
-    public async Task<bool> ApproveCommentAsync(Guid commentId)
-    {
-        var comment = await commentRepository.GetByIdAsync(commentId);
-        if (comment == null)
-        {
-            throw new ApplicationException("Comment not found");
-        }
-
-        comment.IsApproved = true;
-        comment.UpdatedAt = DateTime.UtcNow;
-
-        await commentRepository.UpdateAsync(comment);
-        return true;
-    }
-
-    public async Task<bool> RejectCommentAsync(Guid commentId)
-    {
-        var comment = await commentRepository.GetByIdAsync(commentId);
-        if (comment == null)
-        {
-            throw new ApplicationException("Comment not found");
-        }
-
-        await commentRepository.DeleteAsync(commentId);
-        return true;
     }
 
     public async Task<CommentResponse> ReplyToCommentAsync(Guid parentCommentId, Guid userId, CreateCommentRequest request)

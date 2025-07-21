@@ -137,7 +137,6 @@ public class CommentServiceTests
             Content = request.Content,
             PostId = postId,
             UserId = userId,
-            IsApproved = true
         };
 
         var userResponse = new UserResponse
@@ -174,8 +173,7 @@ public class CommentServiceTests
         
         await _commentRepository.Received(1).AddAsync(Arg.Is<Comment>(c => 
             c.UserId == userId && 
-            c.PostId == postId &&
-            c.IsApproved == true));
+            c.PostId == postId));
     }
 
     [Fact]
@@ -355,7 +353,6 @@ public class CommentServiceTests
             Id = commentId,
             UserId = userId,
             Content = "Original content",
-            IsApproved = true
         };
 
         var expectedResponse = new CommentResponse
@@ -376,7 +373,6 @@ public class CommentServiceTests
         
         await _commentRepository.Received(1).UpdateAsync(Arg.Is<Comment>(c => 
             c.Id == commentId && 
-            c.IsApproved == false &&
             c.UpdatedAt != null));
     }
 
@@ -566,126 +562,6 @@ public class CommentServiceTests
 
     #endregion
 
-    #region GetPendingCommentsAsync Tests
-
-    [Fact]
-    public async Task GetPendingCommentsAsync_ShouldReturnMappedPendingCommentsList()
-    {
-        // Arrange
-        var comments = new List<Comment>
-        {
-            new Comment { Id = Guid.NewGuid(), Content = "Pending comment 1", IsApproved = false },
-            new Comment { Id = Guid.NewGuid(), Content = "Pending comment 2", IsApproved = false }
-        };
-
-        var expectedResponse = new List<CommentResponse>
-        {
-            new CommentResponse { Id = comments[0].Id, Content = "Pending comment 1" },
-            new CommentResponse { Id = comments[1].Id, Content = "Pending comment 2" }
-        };
-
-        _commentRepository.GetPendingCommentsAsync().Returns(comments);
-        _mapper.Map<IEnumerable<CommentResponse>>(comments).Returns(expectedResponse);
-
-        // Act
-        var result = await _commentService.GetPendingCommentsAsync();
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Should().BeEquivalentTo(expectedResponse);
-        await _commentRepository.Received(1).GetPendingCommentsAsync();
-    }
-
-    #endregion
-
-    #region ApproveCommentAsync Tests
-
-    [Fact]
-    public async Task ApproveCommentAsync_WithExistingComment_ShouldApproveAndReturnTrue()
-    {
-        // Arrange
-        var commentId = Guid.NewGuid();
-        var comment = new Comment
-        {
-            Id = commentId,
-            Content = "Test comment",
-            IsApproved = false
-        };
-
-        _commentRepository.GetByIdAsync(commentId).Returns(comment);
-
-        // Act
-        var result = await _commentService.ApproveCommentAsync(commentId);
-
-        // Assert
-        result.Should().BeTrue();
-        
-        await _commentRepository.Received(1).UpdateAsync(Arg.Is<Comment>(c => 
-            c.Id == commentId && 
-            c.IsApproved == true &&
-            c.UpdatedAt != null));
-    }
-
-    [Fact]
-    public async Task ApproveCommentAsync_WithNonExistentComment_ShouldThrowApplicationException()
-    {
-        // Arrange
-        var commentId = Guid.NewGuid();
-        _commentRepository.GetByIdAsync(commentId).Returns((Comment)null);
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<ApplicationException>(
-            () => _commentService.ApproveCommentAsync(commentId)
-        );
-
-        exception.Message.Should().Be("Comment not found");
-        await _commentRepository.DidNotReceive().UpdateAsync(Arg.Any<Comment>());
-    }
-
-    #endregion
-
-    #region RejectCommentAsync Tests
-
-    [Fact]
-    public async Task RejectCommentAsync_WithExistingComment_ShouldDeleteAndReturnTrue()
-    {
-        // Arrange
-        var commentId = Guid.NewGuid();
-        var comment = new Comment
-        {
-            Id = commentId,
-            Content = "Test comment",
-            IsApproved = false
-        };
-
-        _commentRepository.GetByIdAsync(commentId).Returns(comment);
-
-        // Act
-        var result = await _commentService.RejectCommentAsync(commentId);
-
-        // Assert
-        result.Should().BeTrue();
-        await _commentRepository.Received(1).DeleteAsync(commentId);
-    }
-
-    [Fact]
-    public async Task RejectCommentAsync_WithNonExistentComment_ShouldThrowApplicationException()
-    {
-        // Arrange
-        var commentId = Guid.NewGuid();
-        _commentRepository.GetByIdAsync(commentId).Returns((Comment)null);
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<ApplicationException>(
-            () => _commentService.RejectCommentAsync(commentId)
-        );
-
-        exception.Message.Should().Be("Comment not found");
-        await _commentRepository.DidNotReceive().DeleteAsync(Arg.Any<Guid>());
-    }
-
-    #endregion
-
     #region ReplyToCommentAsync Tests
 
     [Fact]
@@ -715,7 +591,6 @@ public class CommentServiceTests
             UserId = userId,  // This will be set by CreateAsync
             PostId = postId,  // This will be set by CreateAsync
             ParentCommentId = parentCommentId,  // This will be set by CreateAsync
-            IsApproved = true  // This will be set by CreateAsync
         };
         
         var expectedResponse = new CommentResponse { Id = replyComment.Id, Content = request.Content };
@@ -744,8 +619,7 @@ public class CommentServiceTests
         await _commentRepository.Received(1).AddAsync(Arg.Is<Comment>(c => 
             c.UserId == userId && 
             c.PostId == postId &&
-            c.ParentCommentId == parentCommentId &&
-            c.IsApproved == true));
+            c.ParentCommentId == parentCommentId));
     }
 
     [Fact]

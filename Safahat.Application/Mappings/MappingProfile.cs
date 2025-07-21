@@ -98,7 +98,6 @@ public class MappingProfile : Profile
         
         CreateMap<CreateCommentRequest, Comment>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.IsApproved, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.User, opt => opt.Ignore())
@@ -109,7 +108,6 @@ public class MappingProfile : Profile
         
         CreateMap<UpdateCommentRequest, Comment>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
-            .ForMember(dest => dest.IsApproved, opt => opt.Ignore())
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.PostId, opt => opt.Ignore())

@@ -6,5 +6,4 @@ public interface ICommentRepository : IRepository<Comment>
 {
     Task<IEnumerable<Comment>> GetCommentsByPostAsync(Guid postId);
     Task<IEnumerable<Comment>> GetCommentsByUserAsync(Guid userId);
-    Task<IEnumerable<Comment>> GetPendingCommentsAsync();
 }
