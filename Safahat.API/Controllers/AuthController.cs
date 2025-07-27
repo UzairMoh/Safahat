@@ -25,7 +25,7 @@ public class AuthController(IAuthService authService) : BaseController
         }
         catch (ApplicationException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { error = ex.Message });
         }
     }
 
@@ -44,7 +44,7 @@ public class AuthController(IAuthService authService) : BaseController
         }
         catch (ApplicationException ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new { error = ex.Message });
         }
     }
 

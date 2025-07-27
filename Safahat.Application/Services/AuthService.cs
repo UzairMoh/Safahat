@@ -26,8 +26,10 @@ public class AuthService(
 {
     public async Task<AuthResponse> LoginAsync(LoginRequest request)
     {
+        // Validate request
         var user = await userRepository.GetByEmailAsync(request.Email);
         
+        // Verify user exists and password matches
         if (user == null || !VerifyPassword(request.Password, user.PasswordHash))
         {
             throw new ApplicationException("Invalid email or password");

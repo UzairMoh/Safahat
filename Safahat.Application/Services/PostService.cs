@@ -49,11 +49,14 @@ public class PostService(
 
     public async Task<PostResponse> CreateAsync(Guid authorId, CreatePostRequest request)
     {
+        // Map request DTO to Post entity
         var post = mapper.Map<Post>(request);
         post.AuthorId = authorId;
         
+        // Generate a unique slug for the post
         post.Slug = await GenerateUniqueSlugAsync(request.Title);
 
+        // Set post status and published date
         if (!request.IsDraft)
         {
             post.Status = PostStatus.Published;
@@ -64,8 +67,10 @@ public class PostService(
             post.Status = PostStatus.Draft;
         }
 
+        // Add post to repository
         var createdPost = await postRepository.AddAsync(post);
 
+        // Assign categories to the post
         if (request.CategoryIds != null && request.CategoryIds.Any())
         {
             createdPost.PostCategories = new List<PostCategory>();
@@ -83,6 +88,7 @@ public class PostService(
             }
         }
 
+        // Assign tags to the post
         if (request.Tags != null && request.Tags.Any())
         {
             createdPost.PostTags = new List<PostTag>();
@@ -91,6 +97,7 @@ public class PostService(
                 var normalizedName = tagName.Trim().ToLower();
                 var slug = GenerateSlug(normalizedName);
                 
+                // Check if tag exists, otherwise create it
                 var tag = await tagRepository.GetBySlugAsync(slug);
                 if (tag == null)
                 {
@@ -110,28 +117,34 @@ public class PostService(
             }
         }
 
+        // Update post with categories and tags
         await postRepository.UpdateAsync(createdPost);
 
+        // Retrieve and return the complete post response
         var completePost = await postRepository.GetByIdAsync(createdPost.Id);
         return mapper.Map<PostResponse>(completePost);
     }
 
     public async Task<PostResponse> UpdateAsync(Guid postId, UpdatePostRequest request)
     {
+        // Retrieve the post by ID
         var post = await postRepository.GetByIdAsync(postId);
         if (post == null)
         {
             throw new ApplicationException("Post not found");
         }
-
+    
+        // Map updated fields from request to post
         mapper.Map(request, post);
         post.UpdatedAt = DateTime.UtcNow;
-
+    
+        // Update slug if title has changed
         if (!string.IsNullOrEmpty(request.Title) && request.Title != post.Title)
         {
             post.Slug = await GenerateUniqueSlugAsync(request.Title, post.Id);
         }
-
+    
+        // Update post categories
         if (request.CategoryIds != null)
         {
             if (post.PostCategories != null)
@@ -142,7 +155,7 @@ public class PostService(
             {
                 post.PostCategories = new List<PostCategory>();
             }
-
+    
             foreach (var categoryId in request.CategoryIds)
             {
                 var category = await categoryRepository.GetByIdAsync(categoryId);
@@ -156,7 +169,8 @@ public class PostService(
                 }
             }
         }
-
+    
+        // Update post tags
         if (request.Tags != null)
         {
             if (post.PostTags != null)
@@ -167,7 +181,7 @@ public class PostService(
             {
                 post.PostTags = new List<PostTag>();
             }
-
+    
             foreach (var tagName in request.Tags)
             {
                 var normalizedName = tagName.Trim().ToLower();
@@ -191,9 +205,11 @@ public class PostService(
                 });
             }
         }
-
+    
+        // Save updated post to repository
         await postRepository.UpdateAsync(post);
-
+    
+        // Retrieve and return the updated post response
         var updatedPost = await postRepository.GetByIdAsync(post.Id);
         return mapper.Map<PostResponse>(updatedPost);
     }
