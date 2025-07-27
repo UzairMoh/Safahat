@@ -125,8 +125,6 @@ public class UserService(
             PublishedPosts = posts.Count(p => p.Status == Models.Enums.PostStatus.Published),
             DraftPosts = posts.Count(p => p.Status == Models.Enums.PostStatus.Draft),
             TotalComments = comments.Count(),
-            ApprovedComments = comments.Count(c => c.IsApproved),
-            PendingComments = comments.Count(c => !c.IsApproved)
         };
     }
 }

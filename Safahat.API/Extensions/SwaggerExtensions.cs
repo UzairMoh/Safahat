@@ -20,7 +20,7 @@ public static class SwaggerExtensions
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
             if (File.Exists(xmlPath))
             {
-                c.IncludeXmlComments(xmlPath);
+                c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
             }
 
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -29,7 +29,8 @@ public static class SwaggerExtensions
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
+                Scheme = "Bearer",
+                BearerFormat = "JWT"
             });
 
             c.AddSecurityRequirement(new OpenApiSecurityRequirement

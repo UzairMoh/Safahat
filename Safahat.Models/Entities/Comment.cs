@@ -15,12 +15,6 @@ public class Comment : BaseEntity
     [StringLength(2000)]
     public string Content { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Indicates whether the comment has been approved by a moderator
-    /// </summary>
-    [Required]
-    public bool IsApproved { get; set; } = false;
-
     // Foreign keys
 
     /// <summary>

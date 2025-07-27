@@ -44,11 +44,11 @@ public class PostRepository(SafahatDbContext context) : Repository<Post>(context
     {
         return await DbSet
             .Include(p => p.Author)
-            .Include(p => p.Comments.Where(c => c.IsApproved))
+            .Include(p => p.Comments)
             .Include(p => p.PostCategories)
-                .ThenInclude(pc => pc.Category)
+            .ThenInclude(pc => pc.Category)
             .Include(p => p.PostTags)
-                .ThenInclude(pt => pt.Tag)
+            .ThenInclude(pt => pt.Tag)
             .FirstOrDefaultAsync(p => p.Slug == slug && p.Status == PostStatus.Published);
     }
 
