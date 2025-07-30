@@ -12,6 +12,6 @@ public interface ICategoryService
     Task<CategoryResponse> UpdateAsync(Guid categoryId, UpdateCategoryRequest request);
     Task<bool> DeleteAsync(Guid categoryId);
         
-    // Specialized operations
+    // Specialised operations
     Task<IEnumerable<CategoryResponse>> GetCategoriesWithPostCountAsync();
 }

@@ -24,7 +24,7 @@ public abstract class BaseController : ControllerBase
         User.IsInRole("Admin");
     
     /// <summary>
-    /// Checks if the current user is authorized to access a resource
+    /// Checks if the current user is authorised to access a resource
     /// </summary>
     protected bool UserCanAccessResource(Guid resourceOwnerId)
     {

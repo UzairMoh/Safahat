@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Safahat.Extensions;
 using Safahat.Application;
 using Safahat.Infrastructure;
-using Safahat.Infrastructure.Data;
 using Safahat.Infrastructure.Data.Context;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,26 +16,30 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.AddAuthorisationPolicies();
 builder.Services.AddCorsConfiguration();
 
-// Project-specific services
-builder.Services.AddInfrastructure(builder.Configuration);
+// Project-specific services - Pass environment to AddInfrastructure
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 builder.Services.AddApplication();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+// Database migration - ONLY if not in Testing environment
+if (!app.Environment.IsEnvironment("Testing"))
 {
-    try
+    using (var scope = app.Services.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<SafahatDbContext>();
-        
-        Console.WriteLine("Applying database migrations...");
-        await context.Database.MigrateAsync();
-        Console.WriteLine("Database migrations applied successfully.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error applying migrations: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        try
+        {
+            var context = scope.ServiceProvider.GetRequiredService<SafahatDbContext>();
+            
+            Console.WriteLine("Applying database migrations...");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("Database migrations applied successfully.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error applying migrations: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
     }
 }
 
@@ -52,3 +55,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+
+public partial class Program { }

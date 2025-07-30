@@ -6,6 +6,4 @@ public class UserStatisticsResponse
     public int PublishedPosts { get; set; }
     public int DraftPosts { get; set; }
     public int TotalComments { get; set; }
-    public int ApprovedComments { get; set; }
-    public int PendingComments { get; set; }
 }

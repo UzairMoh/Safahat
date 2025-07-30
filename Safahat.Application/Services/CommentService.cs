@@ -81,7 +81,7 @@ public class CommentService(
 
         if (comment.UserId != userId)
         {
-            throw new ApplicationException("You are not authorized to update this comment");
+            throw new ApplicationException("You are not authorised to update this comment");
         }
 
         mapper.Map(request, comment);
@@ -102,7 +102,7 @@ public class CommentService(
         // Allow deletion if user is the author OR user is an admin
         if (comment.UserId != userId && !isAdmin)
         {
-            throw new ApplicationException("You are not authorized to delete this comment");
+            throw new ApplicationException("You are not authorised to delete this comment");
         }
 
         await commentRepository.DeleteAsync(commentId);

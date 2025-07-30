@@ -404,8 +404,17 @@ public class UserServiceTests
             new Post { Id = Guid.NewGuid(), AuthorId = userId, Status = PostStatus.Draft }
         };
 
+        var comments = new List<Comment>
+        {
+            new Comment { Id = Guid.NewGuid(), UserId = userId },
+            new Comment { Id = Guid.NewGuid(), UserId = userId },
+            new Comment { Id = Guid.NewGuid(), UserId = userId },
+            new Comment { Id = Guid.NewGuid(), UserId = userId }
+        };
+
         _userRepository.GetByIdAsync(userId).Returns(user);
         _postRepository.GetPostsByAuthorAsync(userId).Returns(posts);
+        _commentRepository.GetCommentsByUserAsync(userId).Returns(comments);
 
         // Act
         var result = await _userService.GetUserStatisticsAsync(userId);
@@ -416,8 +425,6 @@ public class UserServiceTests
         result.PublishedPosts.Should().Be(2);
         result.DraftPosts.Should().Be(1);
         result.TotalComments.Should().Be(4);
-        result.ApprovedComments.Should().Be(2);
-        result.PendingComments.Should().Be(2);
     }
 
     [Fact]
@@ -457,8 +464,6 @@ public class UserServiceTests
         result.PublishedPosts.Should().Be(0);
         result.DraftPosts.Should().Be(0);
         result.TotalComments.Should().Be(0);
-        result.ApprovedComments.Should().Be(0);
-        result.PendingComments.Should().Be(0);
     }
 
     #endregion

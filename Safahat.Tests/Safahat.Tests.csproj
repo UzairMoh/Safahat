@@ -12,6 +12,10 @@
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.0"/>
         <PackageReference Include="FluentAssertions" Version="8.2.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.18" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.10" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
         <PackageReference Include="NSubstitute" Version="5.3.0" />
         <PackageReference Include="xunit" Version="2.5.3"/>
@@ -23,9 +27,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Safahat.API\Safahat.API.csproj" />
       <ProjectReference Include="..\Safahat.Application\Safahat.Application.csproj" />
       <ProjectReference Include="..\Safahat.Infrastructure\Safahat.Infrastructure.csproj" />
       <ProjectReference Include="..\Safahat.Models\Safahat.Models.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Unit\" />
     </ItemGroup>
 
 </Project>

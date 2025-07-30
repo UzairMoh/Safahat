@@ -152,7 +152,6 @@ public class CommentServiceTests
             Content = request.Content,
             PostId = postId,
             User = userResponse,
-            IsApproved = true
         };
 
         _userRepository.GetByIdAsync(userId).Returns(user);
@@ -418,7 +417,7 @@ public class CommentServiceTests
             () => _commentService.UpdateAsync(commentId, userId, request)
         );
 
-        exception.Message.Should().Be("You are not authorized to update this comment");
+        exception.Message.Should().Be("You are not authorised to update this comment");
         await _commentRepository.DidNotReceive().UpdateAsync(Arg.Any<Comment>());
     }
 
@@ -490,7 +489,7 @@ public class CommentServiceTests
             () => _commentService.DeleteAsync(commentId, userId)
         );
 
-        exception.Message.Should().Be("You are not authorized to delete this comment");
+        exception.Message.Should().Be("You are not authorised to delete this comment");
         await _commentRepository.DidNotReceive().DeleteAsync(Arg.Any<Guid>());
     }
 
