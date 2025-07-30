@@ -3,7 +3,7 @@
 namespace Safahat.Models.Entities;
 
 /// <summary>
-/// Represents a tag for labeling and organizing blog posts
+/// Represents a tag for labeling and organising blog posts
 /// </summary>
 public class Tag : BaseEntity
 {

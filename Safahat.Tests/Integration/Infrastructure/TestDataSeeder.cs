@@ -1,63 +1,55 @@
-﻿using Safahat.Infrastructure.Data.Context;
+﻿using System.Security.Cryptography;
+using Safahat.Infrastructure.Data.Context;
 using Safahat.Models.Entities;
 using Safahat.Models.Enums;
 
 namespace Safahat.Tests.Integration.Infrastructure;
 
 /// <summary>
-/// Seeds the test database with consistent test data for all integration tests.
-/// Provides known entity IDs and realistic test scenarios for comprehensive testing.
+/// Seeds the test database with consistent test data for integration tests.
 /// </summary>
 public static class TestDataSeeder
 {
     #region Test Entity IDs
     
-    // Test users with descriptive names
     public static readonly Guid ReaderUserId = new("11111111-1111-1111-1111-111111111111");
     public static readonly Guid AuthorUserId = new("22222222-2222-2222-2222-222222222222");
     public static readonly Guid AdminUserId = new("33333333-3333-3333-3333-333333333333");
     public static readonly Guid OtherReaderUserId = new("44444444-4444-4444-4444-444444444444");
     public static readonly Guid InactiveUserId = new("55555555-5555-5555-5555-555555555555");
     
-    // Test categories
     public static readonly Guid TechnologyCategoryId = new("66666666-6666-6666-6666-666666666666");
     public static readonly Guid LifestyleCategoryId = new("77777777-7777-7777-7777-777777777777");
     
-    // Test tags
     public static readonly Guid CSharpTagId = new("88888888-8888-8888-8888-888888888888");
     public static readonly Guid TestingTagId = new("99999999-9999-9999-9999-999999999999");
     
-    // Test posts
     public static readonly Guid PublishedPostId = new("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
     public static readonly Guid DraftPostId = new("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
     public static readonly Guid FeaturedPostId = new("cccccccc-cccc-cccc-cccc-cccccccccccc");
     public static readonly Guid AuthorPostId = new("dddddddd-dddd-dddd-dddd-dddddddddddd");
     
-    // Test comments
     public static readonly Guid ApprovedCommentId = new("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee");
     public static readonly Guid PendingCommentId = new("ffffffff-ffff-ffff-ffff-ffffffffffff");
     
     #endregion
 
-    #region Constants for Test Data
+    #region Constants
     
     private static readonly DateTime BaseDateTime = new(2024, 1, 1, 12, 0, 0, DateTimeKind.Utc);
+    public const string TestPassword = "test-password";
     
     #endregion
 
     /// <summary>
     /// Seeds the test database with all necessary test data.
-    /// Ensures referential integrity and realistic data relationships.
     /// </summary>
-    /// <param name="context">The database context to seed</param>
     public static void SeedData(SafahatDbContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         
-        // Ensure clean state
         ResetDatabase(context);
         
-        // Seed in order to maintain referential integrity
         SeedUsers(context);
         SeedCategories(context);
         SeedTags(context);
@@ -80,56 +72,11 @@ public static class TestDataSeeder
     {
         var users = new User[]
         {
-            CreateUser(
-                id: ReaderUserId,
-                username: "readeruser",
-                email: "reader@test.com",
-                firstName: "Reader",
-                lastName: "User",
-                role: UserRole.Reader,
-                isActive: true,
-                daysAgo: 30
-            ),
-            CreateUser(
-                id: AuthorUserId,
-                username: "authoruser",
-                email: "author@test.com",
-                firstName: "Author",
-                lastName: "User",
-                role: UserRole.Author,
-                isActive: true,
-                daysAgo: 45
-            ),
-            CreateUser(
-                id: AdminUserId,
-                username: "adminuser",
-                email: "admin@test.com",
-                firstName: "Admin",
-                lastName: "User",
-                role: UserRole.Admin,
-                isActive: true,
-                daysAgo: 60
-            ),
-            CreateUser(
-                id: OtherReaderUserId,
-                username: "otherreader",
-                email: "other@test.com",
-                firstName: "Other",
-                lastName: "Reader",
-                role: UserRole.Reader,
-                isActive: true,
-                daysAgo: 15
-            ),
-            CreateUser(
-                id: InactiveUserId,
-                username: "inactiveuser",
-                email: "inactive@test.com",
-                firstName: "Inactive",
-                lastName: "User",
-                role: UserRole.Reader,
-                isActive: false,
-                daysAgo: 90
-            )
+            CreateUser(ReaderUserId, "readeruser", "reader@test.com", "Reader", "User", UserRole.Reader, true, 30),
+            CreateUser(AuthorUserId, "authoruser", "author@test.com", "Author", "User", UserRole.Author, true, 45),
+            CreateUser(AdminUserId, "adminuser", "admin@test.com", "Admin", "User", UserRole.Admin, true, 60),
+            CreateUser(OtherReaderUserId, "otherreader", "other@test.com", "Other", "Reader", UserRole.Reader, true, 15),
+            CreateUser(InactiveUserId, "inactiveuser", "inactive@test.com", "Inactive", "User", UserRole.Reader, false, 90)
         };
         
         context.Users.AddRange(users);
@@ -139,20 +86,8 @@ public static class TestDataSeeder
     {
         var categories = new Category[]
         {
-            CreateCategory(
-                id: TechnologyCategoryId,
-                name: "Technology",
-                slug: "technology",
-                description: "Technology and programming related posts",
-                daysAgo: 20
-            ),
-            CreateCategory(
-                id: LifestyleCategoryId,
-                name: "Lifestyle",
-                slug: "lifestyle",
-                description: "Lifestyle and personal development posts",
-                daysAgo: 20
-            )
+            CreateCategory(TechnologyCategoryId, "Technology", "technology", "Technology and programming related posts", 20),
+            CreateCategory(LifestyleCategoryId, "Lifestyle", "lifestyle", "Lifestyle and personal development posts", 20)
         };
         
         context.Categories.AddRange(categories);
@@ -162,18 +97,8 @@ public static class TestDataSeeder
     {
         var tags = new Tag[]
         {
-            CreateTag(
-                id: CSharpTagId,
-                name: "csharp",
-                slug: "csharp",
-                daysAgo: 15
-            ),
-            CreateTag(
-                id: TestingTagId,
-                name: "testing",
-                slug: "testing",
-                daysAgo: 15
-            )
+            CreateTag(CSharpTagId, "csharp", "csharp", 15),
+            CreateTag(TestingTagId, "testing", "testing", 15)
         };
         
         context.Tags.AddRange(tags);
@@ -183,58 +108,25 @@ public static class TestDataSeeder
     {
         var posts = new Post[]
         {
-            CreatePost(
-                id: PublishedPostId,
-                title: "Getting Started with C# Testing",
-                content: "This comprehensive guide covers the fundamentals of testing in C#, including unit tests, integration tests, and best practices for maintaining high-quality code.",
-                summary: "A comprehensive guide to C# testing fundamentals",
-                slug: "getting-started-csharp-testing",
-                status: PostStatus.Published,
-                authorId: ReaderUserId,
-                viewCount: 125,
-                isFeatured: false,
-                publishedDaysAgo: 5,
-                createdDaysAgo: 7
-            ),
-            CreatePost(
-                id: DraftPostId,
-                title: "Advanced Integration Testing Techniques",
-                content: "This post explores advanced techniques for integration testing in modern web applications, including database testing, authentication testing, and performance considerations.",
-                summary: "Advanced integration testing strategies and techniques",
-                slug: "advanced-integration-testing-techniques",
-                status: PostStatus.Draft,
-                authorId: ReaderUserId,
-                viewCount: 0,
-                isFeatured: false,
-                publishedDaysAgo: null,
-                createdDaysAgo: 3
-            ),
-            CreatePost(
-                id: FeaturedPostId,
-                title: "The Future of Software Development",
-                content: "An in-depth analysis of emerging trends in software development, including AI-assisted coding, cloud-native architectures, and the evolution of programming languages.",
-                summary: "Exploring emerging trends in software development",
-                slug: "future-of-software-development",
-                status: PostStatus.Published,
-                authorId: AdminUserId,
-                viewCount: 450,
-                isFeatured: true,
-                publishedDaysAgo: 10,
-                createdDaysAgo: 12
-            ),
-            CreatePost(
-                id: AuthorPostId,
-                title: "Personal Productivity Tips for Developers",
-                content: "Practical tips and strategies for improving personal productivity as a software developer, including time management, tool selection, and work-life balance.",
-                summary: "Productivity tips specifically for software developers",
-                slug: "productivity-tips-for-developers",
-                status: PostStatus.Published,
-                authorId: AuthorUserId,
-                viewCount: 89,
-                isFeatured: false,
-                publishedDaysAgo: 8,
-                createdDaysAgo: 9
-            )
+            CreatePost(PublishedPostId, "Getting Started with C# Testing", 
+                "This comprehensive guide covers the fundamentals of testing in C#, including unit tests, integration tests, and best practices for maintaining high-quality code.",
+                "A comprehensive guide to C# testing fundamentals", "getting-started-csharp-testing", 
+                PostStatus.Published, ReaderUserId, 125, false, 5, 7),
+            
+            CreatePost(DraftPostId, "Advanced Integration Testing Techniques",
+                "This post explores advanced techniques for integration testing in modern web applications, including database testing, authentication testing, and performance considerations.",
+                "Advanced integration testing strategies and techniques", "advanced-integration-testing-techniques",
+                PostStatus.Draft, ReaderUserId, 0, false, null, 3),
+            
+            CreatePost(FeaturedPostId, "The Future of Software Development",
+                "An in-depth analysis of emerging trends in software development, including AI-assisted coding, cloud-native architectures, and the evolution of programming languages.",
+                "Exploring emerging trends in software development", "future-of-software-development",
+                PostStatus.Published, AdminUserId, 450, true, 10, 12),
+            
+            CreatePost(AuthorPostId, "Personal Productivity Tips for Developers",
+                "Practical tips and strategies for improving personal productivity as a software developer, including time management, tool selection, and work-life balance.",
+                "Productivity tips specifically for software developers", "productivity-tips-for-developers",
+                PostStatus.Published, AuthorUserId, 89, false, 8, 9)
         };
         
         context.Posts.AddRange(posts);
@@ -242,7 +134,6 @@ public static class TestDataSeeder
     
     private static void SeedPostRelationships(SafahatDbContext context)
     {
-        // Post-Category relationships
         var postCategories = new PostCategory[]
         {
             new() { PostId = PublishedPostId, CategoryId = TechnologyCategoryId },
@@ -251,7 +142,6 @@ public static class TestDataSeeder
             new() { PostId = AuthorPostId, CategoryId = LifestyleCategoryId }
         };
         
-        // Post-Tag relationships
         var postTags = new PostTag[]
         {
             new() { PostId = PublishedPostId, TagId = CSharpTagId },
@@ -269,40 +159,21 @@ public static class TestDataSeeder
     {
         var comments = new Comment[]
         {
-            CreateComment(
-                id: ApprovedCommentId,
-                content: "Excellent article! The examples you provided really helped me understand the concepts better. Looking forward to more content like this.",
-                postId: PublishedPostId,
-                userId: OtherReaderUserId,
-                isApproved: true,
-                daysAgo: 2
-            ),
-            CreateComment(
-                id: PendingCommentId,
-                content: "Thanks for sharing this comprehensive guide. The section on best practices was particularly insightful.",
-                postId: PublishedPostId,
-                userId: AdminUserId,
-                isApproved: true,
-                daysAgo: 1
-            ),
-            CreateComment(
-                id: Guid.NewGuid(),
-                content: "This comment is pending approval and should not appear in public views.",
-                postId: FeaturedPostId,
-                userId: ReaderUserId,
-                isApproved: false,
-                daysAgo: 1
-            ),
-            // Reply to the first comment (hierarchical comment)
-            CreateReplyComment(
-                id: Guid.NewGuid(),
-                content: "I completely agree! This was very helpful for my current project.",
-                postId: PublishedPostId,
-                userId: AuthorUserId,
-                parentCommentId: ApprovedCommentId,
-                isApproved: true,
-                daysAgo: 1
-            )
+            CreateComment(ApprovedCommentId, 
+                "Excellent article! The examples you provided really helped me understand the concepts better. Looking forward to more content like this.",
+                PublishedPostId, OtherReaderUserId, 2),
+            
+            CreateComment(PendingCommentId,
+                "Thanks for sharing this comprehensive guide. The section on best practices was particularly insightful.",
+                PublishedPostId, AdminUserId, 1),
+            
+            CreateComment(Guid.NewGuid(),
+                "This comment is pending approval and should not appear in public views.",
+                FeaturedPostId, ReaderUserId, 1),
+            
+            CreateReplyComment(Guid.NewGuid(),
+                "I completely agree! This was very helpful for my current project.",
+                PublishedPostId, AuthorUserId, ApprovedCommentId, 1)
         };
         
         context.Comments.AddRange(comments);
@@ -312,15 +183,8 @@ public static class TestDataSeeder
 
     #region Factory Methods
     
-    private static User CreateUser(
-        Guid id,
-        string username,
-        string email,
-        string firstName,
-        string lastName,
-        UserRole role,
-        bool isActive,
-        int daysAgo)
+    private static User CreateUser(Guid id, string username, string email, string firstName, string lastName, 
+        UserRole role, bool isActive, int daysAgo)
     {
         var createdAt = BaseDateTime.AddDays(-daysAgo);
         
@@ -371,18 +235,8 @@ public static class TestDataSeeder
         };
     }
     
-    private static Post CreatePost(
-        Guid id,
-        string title,
-        string content,
-        string summary,
-        string slug,
-        PostStatus status,
-        Guid authorId,
-        int viewCount,
-        bool isFeatured,
-        int? publishedDaysAgo,
-        int createdDaysAgo)
+    private static Post CreatePost(Guid id, string title, string content, string summary, string slug,
+        PostStatus status, Guid authorId, int viewCount, bool isFeatured, int? publishedDaysAgo, int createdDaysAgo)
     {
         var createdAt = BaseDateTime.AddDays(-createdDaysAgo);
         var publishedAt = publishedDaysAgo.HasValue ? BaseDateTime.AddDays(-publishedDaysAgo.Value) : (DateTime?)null;
@@ -407,13 +261,7 @@ public static class TestDataSeeder
         };
     }
     
-    private static Comment CreateComment(
-        Guid id,
-        string content,
-        Guid postId,
-        Guid userId,
-        bool isApproved,
-        int daysAgo)
+    private static Comment CreateComment(Guid id, string content, Guid postId, Guid userId, int daysAgo)
     {
         var createdAt = BaseDateTime.AddDays(-daysAgo);
         
@@ -423,21 +271,14 @@ public static class TestDataSeeder
             Content = content,
             PostId = postId,
             UserId = userId,
-            IsApproved = isApproved,
-            ParentCommentId = null, // All test comments are top-level
+            ParentCommentId = null,
             CreatedAt = createdAt,
             UpdatedAt = createdAt
         };
     }
     
-    private static Comment CreateReplyComment(
-        Guid id,
-        string content,
-        Guid postId,
-        Guid userId,
-        Guid parentCommentId,
-        bool isApproved,
-        int daysAgo)
+    private static Comment CreateReplyComment(Guid id, string content, Guid postId, Guid userId, 
+        Guid parentCommentId, int daysAgo)
     {
         var createdAt = BaseDateTime.AddDays(-daysAgo);
         
@@ -448,16 +289,35 @@ public static class TestDataSeeder
             PostId = postId,
             UserId = userId,
             ParentCommentId = parentCommentId,
-            IsApproved = isApproved,
             CreatedAt = createdAt,
             UpdatedAt = createdAt
         };
     }
     
+    /// <summary>
+    /// Generates a properly hashed password that matches the AuthService's hashing algorithm.
+    /// </summary>
     private static string GenerateTestPasswordHash()
     {
-        // Consistent fake hash for all test users - not used in integration tests anyway
-        return "test-password-hash-not-used-in-integration-tests";
+        // Generate a consistent salt for testing
+        byte[] salt = new byte[16];
+        for (int i = 0; i < salt.Length; i++)
+        {
+            salt[i] = (byte)(i + 1);
+        }
+
+        // Hash the password with the salt using the same method as AuthService
+        using (var pbkdf2 = new Rfc2898DeriveBytes(TestPassword, salt, 10000, HashAlgorithmName.SHA256))
+        {
+            byte[] hash = pbkdf2.GetBytes(32);
+
+            // Combine the salt and hash
+            byte[] hashWithSalt = new byte[salt.Length + hash.Length];
+            Array.Copy(salt, 0, hashWithSalt, 0, salt.Length);
+            Array.Copy(hash, 0, hashWithSalt, salt.Length, hash.Length);
+
+            return Convert.ToBase64String(hashWithSalt);
+        }
     }
     
     #endregion

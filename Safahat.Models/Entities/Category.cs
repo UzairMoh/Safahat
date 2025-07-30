@@ -3,7 +3,7 @@
 namespace Safahat.Models.Entities;
 
 /// <summary>
-/// Represents a category for organizing blog posts
+/// Represents a category for organising blog posts
 /// </summary>
 public class Category : BaseEntity
 {

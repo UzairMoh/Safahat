@@ -9,7 +9,7 @@ namespace Safahat.Tests.Integration.Controllers;
 
 /// <summary>
 /// Integration tests for PostsController covering all HTTP endpoints
-/// Tests the complete request pipeline including authentication, authorization, and data persistence
+/// Tests the complete request pipeline including authentication, authorisation, and data persistence
 /// </summary>
 public class PostsControllerIntegrationTests : IClassFixture<SafahatWebApplicationFactory>
 {
@@ -380,7 +380,7 @@ public class PostsControllerIntegrationTests : IClassFixture<SafahatWebApplicati
 
     #endregion
 
-    #region Authorization Tests
+    #region Authorisation Tests
 
     [Fact]
     public async Task GetPostsByAuthor_AsOwner_ShouldReturnAllOwnPosts()

@@ -12,6 +12,7 @@ public class PostRepository(SafahatDbContext context) : Repository<Post>(context
     {
         return await DbSet
             .Include(p => p.Author)
+            .Include(p => p.Comments)
             .Include(p => p.PostCategories)
             .ThenInclude(pc => pc.Category)
             .Include(p => p.PostTags)
@@ -64,9 +65,16 @@ public class PostRepository(SafahatDbContext context) : Repository<Post>(context
     {
         return await DbSet
             .Where(p => p.Status == PostStatus.Published &&
-                       (p.Title.Contains(searchTerm) || 
-                        p.Content.Contains(searchTerm) ||
-                        p.Summary.Contains(searchTerm)))
+                        (p.Title.Contains(searchTerm) || 
+                         p.Content.Contains(searchTerm) ||
+                         p.Summary.Contains(searchTerm) ||
+                         p.PostTags.Any(pt => pt.Tag.Name.Contains(searchTerm)) ||
+                         p.PostTags.Any(pt => pt.Tag.Slug.Contains(searchTerm))))
+            .Include(p => p.Author)
+            .Include(p => p.PostCategories)
+            .ThenInclude(pc => pc.Category)
+            .Include(p => p.PostTags)
+            .ThenInclude(pt => pt.Tag)
             .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();
     }
@@ -75,7 +83,11 @@ public class PostRepository(SafahatDbContext context) : Repository<Post>(context
     {
         return await DbSet
             .Where(p => p.Status == PostStatus.Published)
+            .Include(p => p.Author)
             .Include(p => p.PostCategories)
+            .ThenInclude(pc => pc.Category)
+            .Include(p => p.PostTags)
+            .ThenInclude(pt => pt.Tag)
             .Where(p => p.PostCategories.Any(pc => pc.CategoryId == categoryId))
             .OrderByDescending(p => p.PublishedAt)
             .ToListAsync();

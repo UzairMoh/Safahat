@@ -122,7 +122,11 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return Forbid("You don't have permission to edit this post");
+                return Problem(
+                    statusCode: 403,
+                    title: "Forbidden",
+                    detail: "You don't have permission to edit this post"
+                );
             }
             
             var updatedPost = await postService.UpdateAsync(id, request);
@@ -151,7 +155,11 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return Forbid("You don't have permission to delete this post");
+                return Problem(
+                    statusCode: 403,
+                    title: "Forbidden",
+                    detail: "You don't have permission to delete this post"
+                );
             }
             
             await postService.DeleteAsync(id);
@@ -230,7 +238,11 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return Forbid("You don't have permission to publish this post");
+                return Problem(
+                    statusCode: 403,
+                    title: "Forbidden",
+                    detail: "You don't have permission to publish this post"
+                );
             }
             
             await postService.PublishPostAsync(id);
@@ -259,7 +271,11 @@ public class PostsController(IPostService postService) : BaseController
             
             if (existingPost.Author.Id != UserId && !IsAdmin)
             {
-                return Forbid("You don't have permission to unpublish this post");
+                return Problem(
+                    statusCode: 403,
+                    title: "Forbidden",
+                    detail: "You don't have permission to unpublish this post"
+                );
             }
             
             await postService.UnpublishPostAsync(id);
